@@ -1,0 +1,63 @@
+
+
+fieldset
+{
+	display: inline;
+	vertical-align: top;
+}
+
+.block
+{
+	margin: 32px;
+}
+
+#ScreenField
+{
+	border: 1px solid black;
+	border-collapse: collapse;
+	background-color: #808080;
+}
+
+.FieldCell
+{
+	width: 6px;
+	height: 6px;
+	border: 1px solid black;
+	cursor: pointer;
+}
+
+.FieldCellActive
+{
+	background-color: red;
+}
+
+
+
+.ControlTools
+{
+	//width: 32px;
+	height: 32px;
+}
+
+
+
+#ControlLastColors > * {
+  height: 32px;
+  width: 32px;
+}
+
+.ControlRange
+{
+	margin: 0px 3px;
+	
+}
+
+.ControlRange[type=range]
+{
+	width: 200px;
+}
+
+.ControlRange[type=number]
+{
+	width: 50px;
+}

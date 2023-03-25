@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		
+		<link type="text/css" rel="stylesheet" href="core.css" />
+		
+		<script type="text/javascript" src="jquery-3.6.4.min.js"></script>
+		<script type="text/javascript" src="core.js"></script>
+		<script type="text/javascript" src="export.js"></script>
+		<script type="text/javascript" src="import.js"></script>
+	</head>
+	<body style="background-color: #d0d0d0;">
+
+
+
+
+<div class="block">
+	<table id="ScreenField"></table>
+	<br>
+	<canvas id="canvas" style="border: 1px red solid;"></canvas>
+</div>
+
+<div class="block">
+	
+	<fieldset>
+		<legend>Настройка</legend>
+		
+		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="128" data-type="gridsize" data-value="width" />
+		<br>
+		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="16" data-type="gridsize" data-value="height" />
+	</fieldset>
+	
+	
+	<fieldset>
+		<legend>Рисование</legend>
+		
+		<input type="color" id="ControlColor" value="#00b0f0" />
+		<input type="range" id="ControlAlpha" min="0" max="255" step="1" value="255" />
+		
+		<fieldset style="display: block; ">
+			<div id="ControlLastColors" style="overflow: hidden; width: 224px; height: 32px; display: flow-root;"></div>
+		</fieldset>
+		
+		<br>
+		<br>
+		
+		<button type="button" class="ControlTools" data-type="tools" data-value="pencil">Карандаш</button> 
+		<button type="button" class="ControlTools" data-type="tools" data-value="eraser">Ластик</button> 
+		<button type="button" class="ControlTools" data-type="tools" data-value="clearcolor">Удалить цвет</button> 
+		<button type="button" class="ControlTools" data-type="tools" data-value="pipette">Пипетка</button> 
+	</fieldset>
+	
+	
+
+	
+	
+	
+	<fieldset>
+		<legend>Управление кадрами</legend>
+		
+		<input type="range" class="ControlTools ControlRange" min="0" max="65535" value="200" data-type="frames" data-value="delay" />
+		<br>
+		<button type="button" class="ControlTools" data-type="frames" data-value="left"> Назад </button> 
+		<span id="FrameActiveNum">0</span> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="right"> Вперёд </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="add"> Добавить </button> 
+		<br>
+		<button type="button" class="ControlTools" data-type="frames" data-value="tobuff"> В буфер </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="clear"> Очистить </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="delete"> Удалить </button> 
+	</fieldset>
+	
+	
+	<fieldset>
+		<legend>Импорт данных</legend>
+		
+		<input type="file" id="avatar" acceptq="image/bmp, image/png" style="display: none;" />
+		<input type="button" value=" Обзор... " onclick="$(this).prev().click();" />
+		
+		<div id="ImportResultText"></div>
+	</fieldset>	
+	
+	
+	<fieldset>
+		<legend>Экспорт данных</legend>
+		
+		Формат цветности: <select id="ExportColorFormat" class="ControlTools">
+			<option disabled selected>Выберите</option>
+			<option value="1" >* RGBA</option>
+			<option value="2" >Color_0x02</option>
+			<option value="3" >Color_0x03</option>
+			<option value="4" >Color_0x04</option>
+			<option value="5" >Color_0x05</option>
+			<option value="6" >Color_0x06</option>
+			<option value="7" >Color_0x07</option>
+			<option value="8" >Color_0x08</option>
+			<option value="9" >Color_0x09</option>
+			<option value="10">Color_0x10</option>
+			<option value="11">Color_0x11</option>
+			<option value="12">Color_0x12</option>
+			<option value="13">Color_0x13</option>
+			<option value="14">Color_0x14</option>
+			<option value="15">Color_0x15</option>
+		</select>
+		
+		<br>
+		
+		Формат ленты: <select id="ExportStripFormat" class="ControlTools">
+			<option disabled selected>Выберите</option>
+			<option value="1">Построчная</option>
+			<option value="2" >* Зигзаг вертикальный</option>
+			<option value="3" >Strip_0x03</option>
+			<option value="4" >Strip_0x04</option>
+			<option value="5" >Strip_0x05</option>
+			<option value="6" >Strip_0x06</option>
+			<option value="7" >Strip_0x07</option>
+			<option value="8" >Strip_0x08</option>
+			<option value="9" >Strip_0x09</option>
+			<option value="10">Strip_0x10</option>
+			<option value="11">Strip_0x11</option>
+			<option value="12">Strip_0x12</option>
+			<option value="13">Strip_0x13</option>
+			<option value="14">Strip_0x14</option>
+			<option value="15">Strip_0x15</option>
+		</select>
+		
+		<br>
+		
+		<button type="button" class="ControlTools" data-type="export" data-value="run"> Экспортировать </button> 
+	</fieldset>
+
+</div>
+
+
+
+
+	
+	</body>
+</html>
