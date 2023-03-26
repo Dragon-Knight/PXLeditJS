@@ -276,7 +276,7 @@ class GRID
 			this.#ctx.lineTo(bw + padding, 0.5 + i + padding);
 		}
 		
-		this.#ctx.strokeStyle = "black";
+		this.#ctx.strokeStyle = "#AAAAAA80"; //  = "black";
 		this.#ctx.stroke();
 		
 		return;
@@ -1134,6 +1134,8 @@ function ControlsEvent(event)
 						FrameBuffer.splice(FrameIndex, 0, []);
 
 						ClearScreen();
+
+						// Если добавить после рисования, то пропадает кадр
 						
 						
 						break;

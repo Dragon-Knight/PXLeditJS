@@ -76,10 +76,13 @@ function Export_Run()
 					skip_idx = item.idx + 1;
 					
 					color_parts = item.color.match(/[a-f\d]{1,2}/gi);
-					data[data_idx++] = HEX2INT(color_parts[0]);
-					data[data_idx++] = HEX2INT(color_parts[1]);
-					data[data_idx++] = HEX2INT(color_parts[2]);
-					data[data_idx++] = HEX2INT(color_parts[3]);
+					ColorMapArr[color_format_id].forEach(function(value)
+					{
+						if(value != undefined)
+						{
+							data[data_idx++] = HEX2INT(color_parts[value]);
+						}
+					});
 					
 					pixel_count++;
 				});
@@ -102,10 +105,13 @@ function Export_Run()
 							skip_idx = need_idx + 1;
 							
 							color_parts = item.color.match(/[a-f\d]{1,2}/gi);
-							data[data_idx++] = HEX2INT(color_parts[0]);
-							data[data_idx++] = HEX2INT(color_parts[1]);
-							data[data_idx++] = HEX2INT(color_parts[2]);
-							data[data_idx++] = HEX2INT(color_parts[3]);
+							ColorMapArr[color_format_id].forEach(function(value)
+							{
+								if(value != undefined)
+								{
+									data[data_idx++] = HEX2INT(color_parts[value]);
+								}
+							});
 					
 							pixel_count++;
 							
@@ -197,3 +203,27 @@ function Export_PixelIter()
 	
 	return result;
 }
+
+
+
+// Массив соответствия перетасовки байт цветости. На входе RGBA.
+const ColorMapArr = 
+[
+//   R, G, B, A
+	[0, 1, 2, undefined],	// 0x00, - RGB
+	[0, 1, 2, 3],			// 0x01, - RGBA
+	[1, 0, 2, 3],			// 0x02, - GRBA
+	[],	// 0x03, - 
+	[],	// 0x04, - 
+	[],	// 0x05, - 
+	[],	// 0x06, - 
+	[],	// 0x07, - 
+	[],	// 0x08, - 
+	[],	// 0x09, - 
+	[],	// 0x0A, - 
+	[],	// 0x0B, - 
+	[],	// 0x0C, - 
+	[],	// 0x0D, - 
+	[],	// 0x0E, - 
+	[]	// 0x0F, - 
+];
