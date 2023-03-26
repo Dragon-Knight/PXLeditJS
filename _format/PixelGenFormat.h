@@ -3,8 +3,8 @@
 // Заполнить согласно актуальным типам !!!
 enum format_strip_t : uint8_t
 {
-	STRIP_NONE = 0x00,
-	STRIP_LINE = 0x01,
+	STRIP_LINE = 0x00,
+	STRIP_X01 = 0x01,
 	STRIP_ZIGZAG = 0x02,
 	STRIP_X03 = 0x03,
 	STRIP_X04 = 0x04,
