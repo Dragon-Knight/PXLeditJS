@@ -66,7 +66,7 @@ function Export_Run()
 		
 		switch(strip_format_id)
 		{
-			case 1:
+			case 0:
 			{
 				
 				FrameBuffer[index].forEach(function(item)
