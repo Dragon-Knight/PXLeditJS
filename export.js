@@ -10,15 +10,8 @@ function Export_SizeCalculation()
 
 function Export_Run()
 {
-	
-	
-	var frames_delay = parseInt( $('input.ControlTools[data-type="frames"][data-value="delay"]').val() );
-	
 	var color_format_id = parseInt( $('#ExportColorFormat').val() );
 	var strip_format_id = parseInt( $('#ExportStripFormat').val() );
-	
-	
-	
 	
 	
 	
@@ -47,8 +40,10 @@ function Export_Run()
 	
 	for(index = 0; index < FrameBuffer.length; index++)
 	{
-		data[data_idx++] = frames_delay & 0xFF;
-		data[data_idx++] = (frames_delay >> 8) & 0xFF;
+		var frame_timeout = FrameBuffer[index].timeout;
+		
+		data[data_idx++] = frame_timeout & 0xFF;
+		data[data_idx++] = (frame_timeout >> 8) & 0xFF;
 		
 		// Отметка адреса, куда нужно вставить кол-во пикселей в кадре.
 		var pixel_count_index = data_idx;
@@ -69,7 +64,7 @@ function Export_Run()
 			case 0:
 			{
 				
-				FrameBuffer[index].forEach(function(item)
+				FrameBuffer[index].pixels.forEach(function(item)
 				{
 					data[data_idx++] = (item.idx - skip_idx) & 0xFF;
 					data[data_idx++] = ((item.idx - skip_idx) >> 8) & 0xFF;
@@ -92,11 +87,11 @@ function Export_Run()
 			case 2:
 			{
 				
-				var idx_map = Export_PixelIter();
+				var idx_map = Export_PixelIter(FieldWidth, FieldHeight);
 				
 				idx_map.forEach(function(read_idx, need_idx)
 				{
-					FrameBuffer[index].forEach(function(item)
+					FrameBuffer[index].pixels.forEach(function(item)
 					{
 						if(item.idx == read_idx)
 						{
@@ -172,13 +167,53 @@ function saveByteArray(reportName, byte) {
 
 
 
-function Export_PixelIter()
+function GetMappingFormat(format, width, height)
+{
+	result = undefined;
+
+	switch(format)
+	{
+		case 0: { result = Export_LineIter(width, height); break; }
+		case 2: { result = Export_PixelIter(width, height); break; }
+		default:
+		{
+			alert('Этот формат ленты ещё не поддерживается!');
+
+			break;
+		}
+	}
+
+	return result;
+}
+
+
+
+
+
+
+
+
+
+
+function Export_LineIter(width, height)
+{
+	var result = [];
+	
+	for(var i = 0; i < width * height; i++)
+	{
+		result.push(i);
+	}
+	
+	return result;
+}
+
+function Export_PixelIter(width, height)
 {
 	var result = [];
 	
 	var idx = 0;
 	var up = false;
-	var stop_val = ((FieldWidth % 2 == 0) ? (FieldWidth) : (FieldWidth * FieldHeight)) - 1;
+	var stop_val = ((width % 2 == 0) ? (width) : (width * height)) - 1;
 	
 	while(true)
 	{
@@ -186,17 +221,17 @@ function Export_PixelIter()
 		
 		if(idx == stop_val) break;
 		
-		idx = (up == false) ? (idx + FieldWidth) : (idx - FieldWidth);
+		idx = (up == false) ? (idx + width) : (idx - width);
 		
-		if( idx >= (FieldWidth * FieldHeight) )
+		if( idx >= (width * height) )
 		{
-			idx -= (FieldWidth - 1);
+			idx -= (width - 1);
 			up = true;
 		}
 		
 		if( idx < 0 )
 		{
-			idx += (FieldWidth + 1);
+			idx += (width + 1);
 			up = false;
 		}
 	}

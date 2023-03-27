@@ -16,11 +16,7 @@
 
 
 
-<div class="block">
-	<table id="ScreenField"></table>
-	<br>
-	<canvas id="canvas" style="border: 1px red solid;"></canvas>
-</div>
+
 
 <div class="block">
 	
@@ -30,6 +26,11 @@
 		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="128" data-type="gridsize" data-value="width" />
 		<br>
 		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="16" data-type="gridsize" data-value="height" />
+		<br>
+		<input type="range" class="ControlTools ControlRange" min="1" max="15" value="11" data-type="gridsize" data-value="gridsize" />
+		<br>
+		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="128" data-h="16">128x16</button> 
+		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="180" data-h="1">180x1</button> 
 	</fieldset>
 	
 	
@@ -60,12 +61,13 @@
 	<fieldset>
 		<legend>Управление кадрами</legend>
 		
-		<input type="range" class="ControlTools ControlRange" min="0" max="65535" value="200" data-type="frames" data-value="delay" />
+		<input type="range" class="ControlTools ControlRange" min="0" max="65535" value="200" data-type="frames" data-value="timeout" />
 		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="left"> Назад </button> 
 		<span id="FrameActiveNum">0</span> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="right"> Вперёд </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="add"> Добавить </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="copy"> Копировать </button> 
 		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="tobuff"> В буфер </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="clear"> Очистить </button> 
@@ -135,7 +137,11 @@
 
 </div>
 
-
+<div class="block">
+	<table id="ScreenField"></table>
+	<br>
+	<canvas id="canvas" style="border: 1px red solid;"></canvas>
+</div>
 
 
 	

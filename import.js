@@ -9,83 +9,6 @@ https://stackoverflow.com/questions/2442576/how-does-one-convert-16-bit-rgb565-t
 */
 
 
-function JinxFramer2(file, width, height, callback)
-{
-	var result = false;
-	
-	var ext = file.name.split('.').pop();
-	if( (ext == 'p' || ext == 'out') && file.size < 10*1024*1024 )
-	{
-		var info = confirm("Формат JinxFramer конченый и проектировал его сантехник.. хотя.. ну да.\nБудет произведена попытка разбора файла в формате " + width + " x " + height + ".\nВсё верно? Продолжаем? Точно?");
-		if(info == true)
-		{
-		
-		var reader = new FileReader();
-		reader.readAsArrayBuffer(file);
-		reader.onload = function()
-		{
-			var bytes = new Uint8Array( reader.result );
-			
-			var frame_bytes = width * height * 3;
-			var frames = Array();
-			var type;
-			
-			switch(ext)
-			{
-				case 'p':
-				{
-					type = 'bmp';
-					
-					var frame = Array();
-					
-					for(var i = 3; i < frame_bytes; i += 3)
-					{
-						
-						
-						frame.push(
-						{
-							R: bytes[i+0],
-							G: bytes[i+1],
-							B: bytes[i+2],
-							A: 0xFF
-						});
-					}
-					
-					frames[0] = frame;
-					
-					
-					
-					
-					
-					
-					break;
-				}
-				case 'out':
-				{
-					type = 'gif';
-					
-					break;
-				}
-			}
-			
-			callback(type, frames);
-		}
-		
-		}
-		
-		result = true;
-	}
-	
-	return result;
-}
-
-
-
-
-
-
-
-
 
 
 
@@ -98,7 +21,7 @@ function JinxFramer2(file, width, height, callback)
 	Импорт файл в формате Glediator ( протокол Glediator ).
 	file - Объект File с входным файлом;
 	cfg - Объект с параметрами для разбора файла.
-	callback - функция возвращающая данные одного кадра.
+	callback - Функция возвращающая данные одного кадра.
 	
 	https://github.com/vvip-68/GyverPanelWiFi/wiki/%D0%AD%D0%BA%D1%81%D0%BF%D0%BE%D1%80%D1%82-%D1%8D%D1%84%D1%84%D0%B5%D0%BA%D1%82%D0%BE%D0%B2-%D0%B0%D0%BD%D0%B8%D0%BC%D0%B0%D1%86%D0%B8%D0%B8-%D0%B8%D0%B7-%D0%9F%D0%9E-%C2%ABJinx!%C2%BB
 	
@@ -165,3 +88,97 @@ function Glediator(file, cfg, callback)
 	return result;
 }
 
+
+
+/*
+	file - Объект File с входным файлом;
+	callback_cfg - Функция возвращает настройки файла;
+	callback_frame - Функция возвращает массив одного кадра;
+*/
+function Pixel(file, callback_cfg, callback_frame)
+{
+	var result = false;
+	
+	var ext = file.name.split('.').pop();
+	if( ext == 'pxl' && file.size < 5*1024*1024 )
+	{
+		var info_txt = 'Формат Pixel очистит текущую сцену и настройки и загрузит их из файла.\nПродолжаем?';
+		if(confirm(info_txt) == true)
+		{
+			var reader = new FileReader();
+			reader.readAsArrayBuffer(file);
+			reader.onload = function()
+			{
+				var bytes = new Uint8Array( reader.result );
+				var bytes_idx = 0;
+
+				if(bytes[bytes_idx++] == 'P'.charCodeAt(0) && bytes[bytes_idx++] == 'X'.charCodeAt(0) && bytes[bytes_idx++] == 'L'.charCodeAt(0))
+				{
+					if(bytes[bytes_idx++] == 1)
+					{
+						var cfg_obj = {};
+						cfg_obj.tileX = bytes[bytes_idx++];
+						cfg_obj.tileY = bytes[bytes_idx++];
+						cfg_obj.format_strip = bytes[bytes_idx] & 0x0F;
+						cfg_obj.format_color = (bytes[bytes_idx++] >> 4) & 0x0F;
+						cfg_obj.frame_count = bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
+						cfg_obj.frame_repeats = bytes[bytes_idx++];
+						
+						callback_cfg(cfg_obj);
+
+
+
+						var mapping_format = GetMappingFormat(cfg_obj.format_strip, cfg_obj.tileX, cfg_obj.tileY);
+						
+						for(var frame_idx = 0; frame_idx < cfg_obj.frame_count; frame_idx++)
+						{
+							var frame_pixels = [];
+							var frame_timeout = bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
+							var frame_pixels_count = bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
+							var cfg_frame = {index: frame_idx, count: cfg_obj.frame_count, timeout: frame_timeout};
+
+							var skip = 0;
+							for(var p = 0; p < frame_pixels_count; p++)
+							{
+								skip += bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
+								
+								var color = "#";
+								var color_idx = 0;
+								ColorMapArr[cfg_obj.format_color].forEach(function(value)
+								{
+									if(value != undefined)
+									{
+										color += INT2HEX(bytes[bytes_idx + value]);
+										color_idx++
+									}
+								});
+								bytes_idx += color_idx;
+								
+								frame_pixels.push({idx: mapping_format[(p + skip)], color: color});
+							}
+							
+							callback_frame(frame_pixels, cfg_frame);
+						}
+
+
+
+					}
+					else
+					{
+						alert('Версия не поддерживается!');
+						return;
+					}
+				}
+				else
+				{
+					alert('Формат файла не распознан!');
+					return;
+				}
+			};
+		}
+		
+		result = true;
+	}
+	
+	return result;
+}

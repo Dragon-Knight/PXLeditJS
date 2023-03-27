@@ -2,6 +2,7 @@
 
 var FieldWidth = 128;
 var FieldHeight = 16;
+var FieldGrid = 11;
 
 var FrameBuffer = [];
 var FrameIndex = 0;
@@ -21,7 +22,14 @@ var mouseDown = false;
 
 
 
-
+Object.defineProperty(Number.prototype, "between", 
+{
+	enumerable: false,
+	value: function(min, max)
+	{
+		return (this >= min && this <= max);
+	}
+});
 
 
 
@@ -170,98 +178,22 @@ class GRID
 		
 		// А можно без этого костыля? В событие свой this, который переопределяется.
 		var this2 = this;
-		//this.#canvas.addEventListener("click", function(event)
-	"click mousemove".split(" ").forEach(function(e)
-	{
-		this2.#canvas.addEventListener(e, function(event)
-		{
-			// Неудачная попытка отфильтровать клики вне зоны и на линиях.
-			if((event.offsetX - padding) % grid == 0) return;
-
-			if(event.type == "mousemove" && mouseDown == false)
-			{
-				return;
-			}
-			
-			// Потом перенести в mousemove. Показывать только на клетке но не на сетке.
-			event.target.style.cursor = "pointer";
-			
-
-			
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-			// ----------------------
-			const tileXY = this2._Real2Tile(event.offsetX, event.offsetY);
-			const tileIdx = this2._Tile2Idx(tileXY.x, tileXY.y);
-			
-			var event_data = { color: this2.GetPixelColor(tileIdx), x: tileXY.x, y: tileXY.y, i: tileIdx };
-			var event_resp = this2.#click_event(event.type, event_data);
-			
-			switch(event_resp.action)
-			{
-				case 'set_cell':
-				{
-					this2.DrawPixel(tileXY.x, tileXY.y, tileIdx, event_resp.color);
-					
-					break
-				}
-				case 'del_cell':
-				{
-					this2.ClearPixel(tileXY.x, tileXY.y, tileIdx);
-					
-					break;
-				}
-				case 'del_color':
-				{
-					var delete_color = this2.GetPixelColor(tileIdx);
-					if(delete_color != undefined)
-					{
-						this2.#buffer.forEach(function(pixel_data, idx)
-						{
-							if(pixel_data.color == delete_color)
-							{
-								var tmp = this2._Idx2Tile(idx);
-								this2.ClearPixel(tmp.x, tmp.y, idx);
-							}
-						});
-					}
-					
-					break;
-				}
-				case 'idle':
-				{
-					break;
-				}
-				default:
-				{
-					alert('Неизвестное действие клика по canvas: ' + event_resp.action + '.');
-				}
-			}
-			
-			
-			
-			
-			
-			
-			
-
-			
-			//console.log( {offx: event.offsetX, offy: event.offsetY, x: tileX, y: tileY, i: tileNum} );
-		});
-	});
+		// Не удаляются события. Почему?
+		$(this.#canvas).unbind();
+		//this.#canvas.removeEventListener('click', function(event){ this2.EventHandler(event); });
+		//this.#canvas.removeEventListener('mousemove', function(event){ this2.EventHandler(event); });
 		
+		this.#canvas.addEventListener('click', function(event){ this2.EventHandler(event); });
+		this.#canvas.addEventListener('mousemove', function(event){ this2.EventHandler(event); });;
+
+
+
+
+
 		this.#ctx = this.#canvas.getContext("2d");
 		
 		for(var i = 0; i <= bw; i += grid)
@@ -287,7 +219,87 @@ class GRID
 
 
 
+	EventHandler(event)
+	{
+		var sizeX = this.#base_sizes.sizeX;
+		var sizeY = this.#base_sizes.sizeY;
+		var grid = this.#base_sizes.grid;
+		var padding = this.#base_sizes.padding;
+			
+			// Неудачная попытка отфильтровать клики вне зоны и на линиях.
+			//if((event.offsetX - padding) % grid == 0) return;
+			//if((event.offsetY - padding) % grid == 0) return;
+			if(event.offsetX < padding || event.offsetX > (sizeX * grid-1) + padding) return;
+			if(event.offsetY < padding || event.offsetY > (sizeY * grid-1) + padding) return; 
 
+			if(event.type == "mousemove" && mouseDown == false)
+			{
+				return;
+			}
+			
+			// Потом перенести в mousemove. Показывать только на клетке но не на сетке.
+			event.target.style.cursor = "pointer";
+
+
+			
+			// ----------------------
+			const tileXY = this._Real2Tile(event.offsetX, event.offsetY);
+			const tileIdx = this._Tile2Idx(tileXY.x, tileXY.y);
+			
+			var event_data = { color: this.GetPixelColor(tileIdx), x: tileXY.x, y: tileXY.y, i: tileIdx };
+			var event_resp = this.#click_event(event.type, event_data);
+			
+			switch(event_resp.action)
+			{
+				case 'set_cell':
+				{
+					this.DrawPixel(tileXY.x, tileXY.y, tileIdx, event_resp.color);
+					
+					break
+				}
+				case 'del_cell':
+				{
+					this.ClearPixel(tileXY.x, tileXY.y, tileIdx);
+					
+					break;
+				}
+				case 'del_color':
+				{
+					var delete_color = this.GetPixelColor(tileIdx);
+					if(delete_color != undefined)
+					{
+						this.#buffer.forEach(function(pixel_data, idx)
+						{
+							if(pixel_data.color == delete_color)
+							{
+								var tmp = this._Idx2Tile(idx);
+								this.ClearPixel(tmp.x, tmp.y, idx);
+							}
+						}, this);
+					}
+					
+					break;
+				}
+				case 'idle':
+				{
+					break;
+				}
+				default:
+				{
+					alert('Неизвестное действие клика по canvas: ' + event_resp.action + '.');
+				}
+			}
+			
+			
+			
+			
+			
+			
+			
+
+			
+			//console.log( {offx: event.offsetX, offy: event.offsetY, x: tileX, y: tileY, i: tileNum} );
+	}
 
 
 
@@ -299,9 +311,15 @@ class GRID
 	{
 		var realXY = this._Tile2Real(tileX, tileY);
 		
-		this.#ctx.beginPath();
-		this.#ctx.fillStyle = color;
-		this.#ctx.fillRect(realXY.x, realXY.y, (this.#base_sizes.grid - 1), (this.#base_sizes.grid - 1));
+		//console.log(tileX);
+		//console.log(tileY);
+
+		//if(tileX.between(0, this.#base_sizes.sizeX) && tileY.between(0, this.#base_sizes.sizeY))
+		{
+			this.#ctx.beginPath();
+			this.#ctx.fillStyle = color;
+			this.#ctx.fillRect(realXY.x, realXY.y, (this.#base_sizes.grid - 1), (this.#base_sizes.grid - 1));
+		}
 		
 		this.#buffer[tileIdx] = {idx: tileIdx, color: color};
 		
@@ -496,7 +514,7 @@ $(document).ready(function()
 	
 	
 MyGrid = new GRID();
-MyGrid.Render(FieldWidth, FieldHeight, 11, 15);
+MyGrid.Render(FieldWidth, FieldHeight, FieldGrid, 15);
 MyGrid.SetClickEvent(function(type, data)
 {
 	//console.log(type);
@@ -532,7 +550,7 @@ switch(ActiveTools)
 	{
 		if(data.color != undefined)
 		{
-			$('#ControlColor').val( data.color.slice(0, -2) );
+			$('#ControlColor').val( data.color.slice(0, -2) ).change();
 		}
 		
 		result = { action: "idle" };
@@ -576,39 +594,6 @@ switch(ActiveTools)
   
   
   
-  /*
-		var reader = new JinxFramer( event.target.files[0] );
-		console.log( reader.Parse() );
-		console.log( reader.GetType() );
-		console.log( reader.GetFrame(0) );
-  */
-  
-		
-/*		
-		var jf = JinxFramer2(event.target.files[0], FieldWidth, FieldHeight, function(type, frames)
-		{
-			console.log(type);
-			console.log(frames);
-			
-			
-			if(type == 'bmp')
-			{
-				frames[0].forEach(function(item, idx)
-				{
-					
-					var color = "#" + INT2HEX(item.R) + INT2HEX(item.G) + INT2HEX(item.B) + INT2HEX(item.A);
-					
-					Field_SetPixel({ index: idx, color: color });
-				});
-			}
-			
-			
-			
-		});
-  
-		if(jf == true) return;
-*/
-
 
 		var gld = Glediator(event.target.files[0], {width: FieldWidth, height: FieldHeight}, function(data, index, count)
 		{
@@ -652,6 +637,43 @@ switch(ActiveTools)
 		
 		});
 		if(gld == true) return;
+
+
+
+
+
+		var rxf = Pixel(event.target.files[0], function(config)
+		{
+			//console.log(config);
+
+			MyGrid.Render(config.tileX, config.tileY, FieldGrid, 15);
+			
+		}, function(data, config)
+		{
+			//console.log(data);
+
+			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
+			
+			ClearScreen();
+			data.forEach(function(item)
+			{
+				var tileXY = MyGrid._Idx2Tile(item.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, item.idx, item.color);
+			});
+			CopyScreenToBuff(FrameIndex++);
+
+		});
+
+		if(rxf == true) return;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -902,7 +924,8 @@ function CopyScreenToBuff(index)
 		data.push(obj);
 	});
 	
-	FrameBuffer[index] = data;
+	var timeout = parseInt( $('input[data-type="frames"][data-value="timeout"]').val() );
+	FrameBuffer[index] = {timeout: timeout, pixels: data};
 	
 	return;
 }
@@ -927,8 +950,12 @@ function CopyBuffToScreen(index)
 	*/
 	if(InBuffScreenExists(index) == true)
 	{
-		MyGrid.SetFrame( FrameBuffer[index] );
+		MyGrid.SetFrame( FrameBuffer[index].pixels );
+
+		$('input[data-type="frames"][data-value="timeout"]').val(FrameBuffer[index].timeout).trigger("input");
 	}
+
+	
 	
 	return;
 }
@@ -972,7 +999,7 @@ function ClearBuffScreen(index)
 */
 function InBuffScreenExists(index)
 {
-	return (FrameBuffer[index] !== undefined && FrameBuffer[index].length > 0) ? true : false;
+	return (FrameBuffer[index] !== undefined && FrameBuffer[index].pixels.length > 0) ? true : false;
 }
 
 
@@ -1047,7 +1074,11 @@ function HEX2INT(number)
 
 
 
+/*
 
+После импорта, если нажать Назад, то последний кадр дублируется.
+
+*/
 
 
 
@@ -1080,11 +1111,21 @@ function ControlsEvent(event)
 						
 						break;
 					}
+					case 'preset':
+					{
+						FieldWidth = obj.data('w');
+						FieldHeight = obj.data('h');
+
+						break;
+					}
+					case 'gridsize':
+					{
+						FieldGrid = parseInt(obj.val());
+					}
 				}
 				
-				//GridRender();
-				//CopyBuffToScreen(FrameIndex);
-				MyGrid.Render(FieldWidth, FieldHeight, 11, 15);
+				CopyScreenToBuff(FrameIndex);
+				MyGrid.Render(FieldWidth, FieldHeight, FieldGrid, 15);
 				CopyBuffToScreen(FrameIndex);
 				
 				break;
@@ -1099,6 +1140,12 @@ function ControlsEvent(event)
 			{
 				switch( obj.data('value') )
 				{
+					case 'timeout':
+					{
+						
+						
+						break;
+					}
 					case 'left':
 					{
 						if(FrameIndex > 0)
@@ -1130,6 +1177,7 @@ function ControlsEvent(event)
 					}
 					case 'add':
 					{
+						CopyScreenToBuff(FrameIndex);
 						FrameIndex++;
 						FrameBuffer.splice(FrameIndex, 0, []);
 
@@ -1137,6 +1185,14 @@ function ControlsEvent(event)
 
 						// Если добавить после рисования, то пропадает кадр
 						
+						
+						break;
+					}
+					case 'copy':
+					{
+						CopyScreenToBuff(FrameIndex);
+						FrameIndex++;
+						FrameBuffer.splice(FrameIndex, 0, []);
 						
 						break;
 					}
