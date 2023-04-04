@@ -19,14 +19,16 @@ https://stackoverflow.com/questions/2442576/how-does-one-convert-16-bit-rgb565-t
 
 /*
 	Импорт файл в формате Glediator ( протокол Glediator ).
-	file - Объект File с входным файлом;
-	cfg - Объект с параметрами для разбора файла.
-	callback - Функция возвращающая данные одного кадра.
+		file - Объект File с входным файлом;
+		cfg - Объект с параметрами для разбора файла.
+		callback_frame - Функция возвращает массив одного кадра, параметры:
+			frame - Массив структур пикселей: [{idx: 0, color: "#11223344"}, ..];
+			cfg - Структура параметров кадра: {idx: 0, count: 142, timeout: 100, width: 128, height: 16};
 	
 	https://github.com/vvip-68/GyverPanelWiFi/wiki/%D0%AD%D0%BA%D1%81%D0%BF%D0%BE%D1%80%D1%82-%D1%8D%D1%84%D1%84%D0%B5%D0%BA%D1%82%D0%BE%D0%B2-%D0%B0%D0%BD%D0%B8%D0%BC%D0%B0%D1%86%D0%B8%D0%B8-%D0%B8%D0%B7-%D0%9F%D0%9E-%C2%ABJinx!%C2%BB
 	
 */
-function Glediator(file, cfg, callback)
+function Glediator(file, cfg, callback_frame)
 {
 	var result = false;
 	
@@ -63,18 +65,17 @@ function Glediator(file, cfg, callback)
 						return;
 					}
 					
-					var frame_data = Array();
+					var frame_pixels = Array();
+					var pixel_idx = 0;
 					for(var i = (frame_offset + 1); i < (frame_offset + frame_length); i += 3)
 					{
-						frame_data.push(
-						{
-							R: bytes[i+0],
-							G: bytes[i+1],
-							B: bytes[i+2],
-							A: 0xFF
-						});
+						var color = "#" + INT2HEX(bytes[i+0]) + INT2HEX(bytes[i+1]) + INT2HEX(bytes[i+2]) + "FF";
+						
+						frame_pixels.push( {idx: pixel_idx++, color: color} );
 					}
-					callback(frame_data, frame_index++, frame_count);
+					
+					var cb_cfg = { idx: frame_index++, count: frame_count, timeout: 100, width: cfg.width, height: cfg.height };
+					callback_frame(frame_pixels, cb_cfg);
 					
 					frame_offset += frame_length;
 					
@@ -91,9 +92,11 @@ function Glediator(file, cfg, callback)
 
 
 /*
-	file - Объект File с входным файлом;
-	callback_cfg - Функция возвращает настройки файла;
-	callback_frame - Функция возвращает массив одного кадра;
+		file - Объект File с входным файлом;
+		callback_cfg - Функция возвращает настройки файла;
+		callback_frame - Функция возвращает массив одного кадра, параметры:
+			frame - Массив структур пикселей: [{idx: 0, color: "#11223344"}, ..];
+			cfg - Структура параметров кадра: {idx: 0, count: 142, timeout: 100, width: 128, height: 16};
 */
 function Pixel(file, callback_cfg, callback_frame)
 {
@@ -135,7 +138,6 @@ function Pixel(file, callback_cfg, callback_frame)
 							var frame_pixels = [];
 							var frame_timeout = bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
 							var frame_pixels_count = bytes[bytes_idx++] | (bytes[bytes_idx++] << 8);
-							var cfg_frame = {index: frame_idx, count: cfg_obj.frame_count, timeout: frame_timeout};
 
 							var skip = 0;
 							for(var p = 0; p < frame_pixels_count; p++)
@@ -157,7 +159,8 @@ function Pixel(file, callback_cfg, callback_frame)
 								frame_pixels.push({idx: mapping_format[(p + skip)], color: color});
 							}
 							
-							callback_frame(frame_pixels, cfg_frame);
+							var cb_cfg = { idx: frame_idx, count: cfg_obj.frame_count, timeout: frame_timeout, width: cfg_obj.tileX, height: cfg_obj.tileY };
+							callback_frame(frame_pixels, cb_cfg);
 						}
 
 
@@ -176,6 +179,89 @@ function Pixel(file, callback_cfg, callback_frame)
 				}
 			};
 		}
+		
+		result = true;
+	}
+	
+	return result;
+}
+
+
+/*
+	Offload парсер GIF картинок и анимаций.
+		file - Объект File с входным файлом;
+		callback_frame - Функция возвращает массив одного кадра, параметры:
+			frame - Массив структур пикселей: [{idx: 0, color: "#11223344"}, ..];
+			cfg - Структура параметров кадра: {idx: 0, count: 142, timeout: 100, width: 128, height: 16};
+*/
+function GifOffload(file, callback_frame)
+{
+	var result = false;
+	
+	var ext = file.name.split('.').pop();
+	if( ext == 'gif' && file.size < 5*1024*1024 )
+	{
+		var reader = new FileReader();
+		reader.readAsArrayBuffer(file);
+		reader.onload = function()
+		{
+			var bytes = new Uint8Array( reader.result );
+			var bytes64 = btoa(String.fromCharCode.apply(null, bytes));
+			
+			$.ajax(
+			{
+				url: "gif_ext/index.php",
+				method: "post",
+				dataType: "json",
+				data: {file: bytes64},
+				success: function(data)
+				{
+					//console.log(data);
+					
+					data.forEach(function(frame, id)
+					{
+						GetImagePixels(frame.data, false, function(pixels, cfg)
+						{
+							//console.log(pixels);
+							//console.log(cfg);
+							
+							var cb_cfg = { idx: id, count: data.length, timeout: frame.timeout, width: cfg.width, height: cfg.height };
+							callback_frame(pixels, cb_cfg);
+						});
+					});
+				}
+			});
+		}
+		
+		result = true;
+	}
+	
+	return result;
+}
+
+/*
+	Парсер всех статических картинок.
+		file - Объект File с входным файлом;
+		callback_frame - Функция возвращает массив одного кадра, параметры:
+			frame - Массив структур пикселей: [{idx: 0, color: "#11223344"}, ..];
+			cfg - Структура параметров кадра: {idx: 0, count: 142, timeout: 100, width: 128, height: 16};
+*/
+function StaticImage(file, callback_frame)
+{
+	var result = false;
+	
+	var ext = file.name.split('.').pop();
+	if( (ext == 'bmp' || ext == 'jpg' || ext == 'png') && file.size < 5*1024*1024 )
+	{
+		var img_src = URL.createObjectURL(file);
+		GetImagePixels(img_src, false, function(pixels, cfg)
+		{
+			//console.log(pixels);
+			//console.log(cfg);
+			
+			var cb_cfg = { idx: 0, count: 0, timeout: 100, width: cfg.width, height: cfg.height };
+			callback_frame(pixels, cb_cfg);
+		});
 		
 		result = true;
 	}

@@ -51,6 +51,17 @@
 		<button type="button" class="ControlTools" data-type="tools" data-value="eraser">Ластик</button> 
 		<button type="button" class="ControlTools" data-type="tools" data-value="clearcolor">Удалить цвет</button> 
 		<button type="button" class="ControlTools" data-type="tools" data-value="pipette">Пипетка</button> 
+		
+		<br>
+		
+		<div class="MyGUIIcon ControlTools" title="Карандаш" data-type="tools" data-value="pencil" style="background: center no-repeat url('images/pencil.png');"></div> 
+		<div class="MyGUIIcon ControlTools" title="Пипетка" data-type="tools" data-value="pipette" style="background: center no-repeat url('images/pipette.png');"></div>
+		<div class="MyGUIIcon ControlTools" title="Удалить цвет" data-type="tools" data-value="clearcolor" style="background: center no-repeat url('images/delete.png');"></div>
+		<div class="MyGUIIcon ControlTools" title="Ластик" data-type="tools" data-value="eraser" style="background: center no-repeat url('images/eraser.png');"></div>
+
+
+		
+		
 	</fieldset>
 	
 	
@@ -78,7 +89,7 @@
 	<fieldset>
 		<legend>Импорт данных</legend>
 		
-		<input type="file" id="avatar" acceptq="image/bmp, image/png" style="display: none;" />
+		<input type="file" id="avatar" accept="image/bmp, image/jpg, image/png, image/gif, .pxl, .out" style="display: none;" />
 		<input type="button" value=" Обзор... " onclick="$(this).prev().click();" />
 		
 		<div id="ImportResultText"></div>

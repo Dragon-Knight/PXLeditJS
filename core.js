@@ -595,45 +595,29 @@ switch(ActiveTools)
   
   
 
-		var gld = Glediator(event.target.files[0], {width: FieldWidth, height: FieldHeight}, function(data, index, count)
+		var gld = Glediator(event.target.files[0], {width: FieldWidth, height: FieldHeight}, function(pixels, config)
 		{
 			
-			//console.log(index);
-			//console.log(count);
-			
-			
-			
-
-			
-			data.forEach(function(item, idx)
+			pixels.forEach(function(pixel)
 			{
-				var color = "#" + INT2HEX(item.R) + INT2HEX(item.G) + INT2HEX(item.B) + INT2HEX(item.A);
-				//Field_SetPixel({ index: idx, color: color });
-
-				//DrawPixel(tileX, tileY, tileIdx, color)
-				
-				var tileXY = MyGrid._Idx2Tile(idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, idx, color);
+				var tileXY = MyGrid._Idx2Tile(pixel.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
 			
-			if(index < count-1)
+			if(config.idx < config.count-1)
 			{
 				$('.ControlTools[data-type="frames"][data-value="right"]').click();
 				//console.log("click");
 			}
 			
-			if(index == count-1)
+			if(config.idx == config.count-1)
 			{
 				$('.ControlTools[data-type="frames"][data-value="tobuff"]').click();
 			}
 			
 			
 			
-			$('#ImportResultText').text('Загружено кадров: ' + (index+1) + ' из ' + count + '.').delay(3000).fadeIn(400);
-			
-			
-			
-			//console.log("---");
+			$('#ImportResultText').text('Загружено кадров: ' + (config.idx+1) + ' из ' + config.count + '.').delay(3000).fadeIn(400);
 		
 		});
 		if(gld == true) return;
@@ -648,28 +632,70 @@ switch(ActiveTools)
 
 			MyGrid.Render(config.tileX, config.tileY, FieldGrid, 15);
 			
-		}, function(data, config)
+		}, function(pixels, config)
 		{
-			//console.log(data);
+			//console.log(pixels);
 
 			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
 			
 			ClearScreen();
-			data.forEach(function(item)
+			pixels.forEach(function(pixel)
 			{
-				var tileXY = MyGrid._Idx2Tile(item.idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, item.idx, item.color);
+				var tileXY = MyGrid._Idx2Tile(pixel.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
 			CopyScreenToBuff(FrameIndex++);
 
 		});
-
 		if(rxf == true) return;
 
 
 
 
 
+
+
+
+
+		var gifoff = GifOffload(event.target.files[0], function(pixels, config)
+		{
+			
+			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
+			
+			ClearScreen();
+			pixels.forEach(function(pixel)
+			{
+				var tileXY = MyGrid._Idx2Tile(pixel.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+			});
+			CopyScreenToBuff(FrameIndex++);
+			
+		});
+		if(gifoff == true) return;
+
+
+
+
+
+
+
+
+
+		var stim = StaticImage(event.target.files[0], function(pixels, config)
+		{
+			
+			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
+			
+			CopyScreenToBuff(FrameIndex++);
+			pixels.forEach(function(pixel)
+			{
+				var tileXY = MyGrid._Idx2Tile(pixel.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+			});
+			CopyScreenToBuff(FrameIndex);
+			
+		});
+		if(stim == true) return;
 
 
 
@@ -788,6 +814,10 @@ for(let i = 0; i < data.length; i += 4) {
 		ControlsEvent(event);
 	});
 	$('.ControlTools[type="range"]').on('change', function(event)
+	{
+		ControlsEvent(event);
+	});
+	$('div.ControlTools').on('click', function(event)
 	{
 		ControlsEvent(event);
 	});
@@ -1243,4 +1273,79 @@ function ControlsEvent(event)
 				break;
 			}
 		}
+}
+
+
+
+
+
+
+
+
+
+/*
+	Вызывает callback на каждый найденный пиксель или возвращает массиве всех пикселей одного кадра.
+		img_src - Значение src объекта Image().
+		every - Вызов callback на каждый новый пиксель.
+		callback - Функция в которую передаются след. параметры:
+			pixels - Объект пикселя который содержит его индекса и цвет.
+			cfg - Объект информации о изображении, его размеры.
+*/
+function GetImagePixels(img_src, every, callback)
+{
+	const img = new Image();
+	
+	//img.src = 'data:image/gif;base64,' + file;
+	//img.src = URL.createObjectURL(file);
+	img.src = img_src;
+	img.onerror = function()
+	{
+		URL.revokeObjectURL(this.src);
+		
+		console.log("Cannot load image");
+	};
+	img.onload = function()
+	{
+		URL.revokeObjectURL(this.src);
+		
+		const canvas = document.createElement("canvas");
+		canvas.width = img.width;
+		canvas.height = img.height;
+		
+		const ctx = canvas.getContext("2d"/*, { colorSpace: "srgb" }*/);
+		ctx.drawImage(img, 0, 0, img.width, img.height);
+		
+		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height/*, { colorSpace: "srgb" }*/);
+		const data = imgData.data;
+		
+		var result = Array();
+		for(let i = 0; i < data.length; i += 4)
+		{
+			const red = data[i];
+			const green = data[i + 1];
+			const blue = data[i + 2];
+			const alpha = data[i + 3];
+			
+			if(alpha == 0) continue;
+			//if(red == 0 && green == 0 && blue == 0) continue;
+			
+			let color = "#" + INT2HEX(red) + INT2HEX(green) + INT2HEX(blue) + INT2HEX(alpha);
+			
+			if(every == true)
+			{
+				callback( {idx: (i/4), color: color}, {width: img.width, height: img.height} );
+			}
+			else
+			{
+				result.push( {idx: (i/4), color: color} );
+			}
+		}
+		
+		if(every == false)
+		{
+			callback(result, {width: img.width, height: img.height});
+		}
+	};
+	
+	return;
 }

@@ -61,3 +61,37 @@ fieldset
 {
 	width: 50px;
 }
+
+
+
+
+
+
+
+
+
+
+.MyGUIIcon
+{
+	/*background: center no-repeat url('images/pencil.png');*/
+	display: inline-block;
+	width: 32px;
+	height: 32px;
+	margin: 3px 0px;
+	padding: 3px;
+	border: 1px solid black;
+	border-radius: 6px;
+	box-shadow: 2px 2px 6px black;
+}
+
+.MyGUIIcon:hover
+{
+	box-shadow: 1px 1px 1px black;
+}
+
+.MyGUIIcon Active
+{
+	box-shadow: inset 0px 0px 2px black;
+}
+
+
