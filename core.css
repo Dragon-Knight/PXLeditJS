@@ -95,3 +95,8 @@ fieldset
 }
 
 
+
+
+input:invalid {
+  color:red;
+}

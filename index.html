@@ -91,6 +91,8 @@
 		
 		<input type="file" id="avatar" accept="image/bmp, image/jpg, image/png, image/gif, .pxl, .out" style="display: none;" />
 		<input type="button" value=" Обзор... " onclick="$(this).prev().click();" />
+		<br>
+		<input type="input" id="ImportRemoveColor" minlength="7" maxlength="7" pattern="^#[a-fA-F0-9]{6}$" placeholder="#000000" />
 		
 		<div id="ImportResultText"></div>
 	</fieldset>	

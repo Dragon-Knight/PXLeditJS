@@ -548,6 +548,8 @@ switch(ActiveTools)
 	}
 	case 'pipette':
 	{
+		// Когда водим мышкой с пипеткой то событие вызывается постоянно.
+		
 		if(data.color != undefined)
 		{
 			$('#ControlColor').val( data.color.slice(0, -2) ).change();
@@ -592,14 +594,16 @@ switch(ActiveTools)
     //alert('You selected ' + event.target.files[0].name);
   }
   
-  
-  
+		var remove_color = $('#ImportRemoveColor').val();
+		if(remove_color.length != 7) remove_color = undefined;
 
 		var gld = Glediator(event.target.files[0], {width: FieldWidth, height: FieldHeight}, function(pixels, config)
 		{
 			
 			pixels.forEach(function(pixel)
 			{
+				if(pixel.color.indexOf(remove_color) == 0) return;
+				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
@@ -665,6 +669,8 @@ switch(ActiveTools)
 			ClearScreen();
 			pixels.forEach(function(pixel)
 			{
+				if(pixel.color.indexOf(remove_color) == 0) return;
+				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
@@ -689,6 +695,8 @@ switch(ActiveTools)
 			CopyScreenToBuff(FrameIndex++);
 			pixels.forEach(function(pixel)
 			{
+				if(pixel.color.indexOf(remove_color) == 0) return;
+				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
@@ -703,102 +711,6 @@ switch(ActiveTools)
 
 
 
-
-
-
-
- 
-  
-const file    = event.target.files[0]; // get the file
-const blobURL = URL.createObjectURL(file);
-const img     = new Image();
-img.src       = blobURL;
-
-
-
-img.onerror = function () {
-URL.revokeObjectURL(this.src);
-// Handle the failure properly
-console.log("Cannot load image");
-};
-
-img.onload = function () {
-	
-	
-	//console.log(img.sizes);
-	
-	
-URL.revokeObjectURL(this.src);
-const canvas  = document.createElement("canvas");
-canvas.width  = img.width;
-canvas.height = img.height;
-const ctx     = canvas.getContext("2d"/*, { colorSpace: "srgb" }*/);
-ctx.drawImage(img, 0, 0, img.width, img.height);
-
-
-const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height/*, { colorSpace: "srgb" }*/);
-const data = imgData.data;
-
-// enumerate all pixels
-// each pixel's r,g,b,a datum are stored in separate sequential array elements
-
-
-var table = $('td.FieldCell');	// eq(n)
-
-console.log( data );
-console.log( data.length );
-
-for(let i = 0; i < data.length; i += 4) {
-  const red = data[i];
-  const green = data[i + 1];
-  const blue = data[i + 2];
-  const alpha = data[i + 3];
-  
-  
-  //console.log( red + " " + green + " " + blue + " " + alpha );
-  
-  
-  
-  
-  if(alpha == 0) continue;
-  //if(red == 0 && green == 0 && blue == 0) continue;
-
-  //var new_color = "#" + INT2HEX(red) + "" + INT2HEX(green) + "" + INT2HEX(blue);
-  //var hex_color = new_color + "" + INT2HEX(alpha);
-  
-  //table.eq( i/4 ).attr('data-active', "Y");
-  //table.eq( i/4 ).attr('data-color', hex_color);
-  //table.eq( i/4 ).css('background-color', new_color);
-  
-  var color = "#" + INT2HEX(red) + INT2HEX(green) + INT2HEX(blue) + INT2HEX(alpha);
-  
-  //Field_SetPixel({ index: (i/4), color: color });
-
-
-
-
-
-
-  var tileXY = MyGrid._Idx2Tile((i/4));
-  MyGrid.DrawPixel(tileXY.x, tileXY.y, (i/4), color);
-
- 
-
-
-
-
-
-  
-}
- $('.ControlTools[data-type="frames"][data-value="tobuff"]').click();
-
-
-
-};
-
-
-// ctx.putImageData(imgData, 0, 0);
-  
 	});
 	
 	
