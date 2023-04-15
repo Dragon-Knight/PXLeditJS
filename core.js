@@ -1,8 +1,8 @@
 
 
-var FieldWidth = 128;
-var FieldHeight = 16;
-var FieldGrid = 11;
+var FieldWidth;
+var FieldHeight;
+var FieldGrid;
 
 var FrameBuffer = [];
 var FrameIndex = 0;
@@ -217,7 +217,7 @@ class GRID
 		
 		
 		
-		
+		/*
 		this.#ctx.beginPath();
 		
 		this.#ctx.moveTo( (this.#canvas.width / 2), padding - (padding - 3) );
@@ -225,7 +225,7 @@ class GRID
 		
 		this.#ctx.strokeStyle = "black"; //  = "black";
 		this.#ctx.stroke();
-		
+		*/
 		
 		
 		
@@ -262,16 +262,19 @@ class GRID
 			
 			
 			
+			
+			
+		let text_x = String(tileXY.x + 1).padStart(3, '0') + ' | ' + String(sizeX - tileXY.x).padStart(3, '0');
 		//this.#ctx.beginPath();
 		//this.#ctx.moveTo( event.offsetX, padding - (padding - 3) );
 		//this.#ctx.lineTo( event.offsetX, (padding - 3) );
 		//this.#ctx.strokeStyle = "black"; //  = "black";
 		//this.#ctx.stroke();
 		this.#ctx.fillStyle = "#000000";
-		this.#ctx.font = "12px serif";
+		this.#ctx.font = "12px serif monospace";
 		this.#ctx.textBaseline = "top";
 		this.#ctx.textAlign = "center";
-		this.#ctx.fillText( "" + (tileXY.x+1) + "", event.offsetX, padding - (padding - 3) + 1);
+		this.#ctx.fillText( text_x , event.offsetX+1, (padding - (padding - 3) + 1) );
 		
 		//this.#ctx.beginPath();
 		//this.#ctx.moveTo( padding - (padding - 3), event.offsetY);
@@ -601,12 +604,20 @@ $(document).ready(function()
 		mouseDown = false;
 	}	
 	
+
+
+
+
+
+
+
+
 	
 	
 	
 	
 MyGrid = new GRID();
-MyGrid.Render(FieldWidth, FieldHeight, FieldGrid, 15);
+//MyGrid.Render(FieldWidth, FieldHeight, FieldGrid, 15);
 MyGrid.SetClickEvent(function(type, data)
 {
 	//console.log(type);
@@ -977,7 +988,10 @@ switch(ActiveTools)
 	
 	
 	
-	
+$('input[data-type="gridsize"][data-value="width"]').val(128);
+$('input[data-type="gridsize"][data-value="height"]').val(16);
+$('input[data-type="gridsize"][data-value="gridsize"]').val(10);
+$('input[data-type="gridsize"]').trigger('input');	
 	
 	
 	
@@ -1186,12 +1200,22 @@ function ControlsEvent(event)
 					case 'gridsize':
 					{
 						FieldGrid = parseInt(obj.val());
+						
+						break;
 					}
 				}
+				
+				if(FieldWidth !== undefined && FieldHeight !== undefined && FieldGrid !== undefined)
+				{
+				
+						var tmp = ': ' + FieldWidth + ' x ' + FieldHeight + ', ' + FieldGrid;
+						var timeout_obj = obj.siblings('legend');
+						timeout_obj.html( timeout_obj.html().replace(/: (.*) x (.*), (.*)$/gm, tmp) );
 				
 				CopyScreenToBuff(FrameIndex);
 				MyGrid.Render(FieldWidth, FieldHeight, FieldGrid, 15);
 				CopyBuffToScreen(FrameIndex);
+				}
 				
 				break;
 			}

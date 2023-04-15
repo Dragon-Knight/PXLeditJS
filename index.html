@@ -26,12 +26,27 @@
 	<fieldset>
 		<legend>Настройка</legend>
 		
+		<!--
 		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="128" data-type="gridsize" data-value="width" />
 		<br>
 		<input type="range" class="ControlTools ControlRange" min="1" max="255" value="16" data-type="gridsize" data-value="height" />
 		<br>
 		<input type="range" class="ControlTools ControlRange" min="1" max="15" value="11" data-type="gridsize" data-value="gridsize" />
 		<br>
+		-->
+		
+		
+		<fieldset class="ControlElement">
+			<legend>Размеры: X x Y, S</legend>
+			
+			<input type="range" class="ControlTools ControlRange1" min="1" max="255" value="" data-type="gridsize" data-value="width" />
+			<br>
+			<input type="range" class="ControlTools ControlRange1" min="1" max="255" value="" data-type="gridsize" data-value="height" />
+			<br>
+			<input type="range" class="ControlTools ControlRange1" min="1" max="15" value="" data-type="gridsize" data-value="gridsize" />
+		</fieldset>
+		
+		
 		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="128" data-h="16">128x16</button> 
 		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="180" data-h="1">180x1</button> 
 	</fieldset>
@@ -48,19 +63,14 @@
 		</fieldset>
 		
 		<br>
-		<br>
 		
-		<button type="button" class="ControlTools" data-type="tools" data-value="pencil">Карандаш</button> 
-		<button type="button" class="ControlTools" data-type="tools" data-value="eraser">Ластик</button> 
-		<button type="button" class="ControlTools" data-type="tools" data-value="clearcolor">Удалить цвет</button> 
-		<button type="button" class="ControlTools" data-type="tools" data-value="pipette">Пипетка</button> 
-		<br>
-		<button type="button" class="ControlTools" data-type="tools" data-value="replacecolor">Заменить цвет</button> 
-		
-		<br>
+		<!--
+		https://www.flaticon.com/
+		-->
 		
 		<div class="MyGUIIcon ControlTools" title="Карандаш" data-type="tools" data-value="pencil" style="background: center no-repeat url('images/pencil.png');"></div> 
 		<div class="MyGUIIcon ControlTools" title="Пипетка" data-type="tools" data-value="pipette" style="background: center no-repeat url('images/pipette.png');"></div> 
+		<div class="MyGUIIcon ControlTools" title="Заменить цвет" data-type="tools" data-value="replacecolor" style="background: center no-repeat url('images/replace.png');"></div> 
 		<div class="MyGUIIcon ControlTools" title="Ластик" data-type="tools" data-value="eraser" style="background: center no-repeat url('images/eraser.png');"></div> 
 		<div class="MyGUIIcon ControlTools" title="Крест" data-type="tools" data-value="crossline" style="background: center no-repeat url('images/crossline.png');"></div> 
 		<div class="MyGUIIcon ControlTools" title="Ничего" data-type="tools" data-value="void" style="background: center no-repeat url('images/none.png');"></div> 
