@@ -7,6 +7,8 @@ var FieldGrid = 11;
 var FrameBuffer = [];
 var FrameIndex = 0;
 
+var ImageRepeats = 0;
+
 
 var ActiveTools = "pencil"; // ...........................................................................
 
@@ -211,6 +213,23 @@ class GRID
 		this.#ctx.strokeStyle = "#AAAAAA80"; //  = "black";
 		this.#ctx.stroke();
 		
+		
+		
+		
+		
+		
+		this.#ctx.beginPath();
+		
+		this.#ctx.moveTo( (this.#canvas.width / 2), padding - (padding - 3) );
+		this.#ctx.lineTo( (this.#canvas.width / 2), (padding - 3) );
+		
+		this.#ctx.strokeStyle = "black"; //  = "black";
+		this.#ctx.stroke();
+		
+		
+		
+		
+		
 		return;
 	}
 	
@@ -230,7 +249,50 @@ class GRID
 			//if((event.offsetX - padding) % grid == 0) return;
 			//if((event.offsetY - padding) % grid == 0) return;
 			if(event.offsetX < padding || event.offsetX > (sizeX * grid-1) + padding) return;
-			if(event.offsetY < padding || event.offsetY > (sizeY * grid-1) + padding) return; 
+			if(event.offsetY < padding || event.offsetY > (sizeY * grid-1) + padding) return;
+			
+			
+			
+		const tileXY = this._Real2Tile(event.offsetX, event.offsetY);	
+			
+			
+		this.#ctx.beginPath();
+		this.#ctx.clearRect(0, 0, this.#canvas.width, padding);
+		this.#ctx.clearRect(0, 0, padding, this.#canvas.height);
+			
+			
+			
+		//this.#ctx.beginPath();
+		//this.#ctx.moveTo( event.offsetX, padding - (padding - 3) );
+		//this.#ctx.lineTo( event.offsetX, (padding - 3) );
+		//this.#ctx.strokeStyle = "black"; //  = "black";
+		//this.#ctx.stroke();
+		this.#ctx.fillStyle = "#000000";
+		this.#ctx.font = "12px serif";
+		this.#ctx.textBaseline = "top";
+		this.#ctx.textAlign = "center";
+		this.#ctx.fillText( "" + (tileXY.x+1) + "", event.offsetX, padding - (padding - 3) + 1);
+		
+		//this.#ctx.beginPath();
+		//this.#ctx.moveTo( padding - (padding - 3), event.offsetY);
+		//this.#ctx.lineTo( (padding - 3), event.offsetY );
+		//this.#ctx.strokeStyle = "black"; //  = "black";
+		//this.#ctx.stroke();
+		
+		//this.#ctx.font = "12px serif";
+		//this.#ctx.textBaseline = "middle";
+		this.#ctx.textAlign = "right";
+		this.#ctx.fillText( "" + (tileXY.y+1) + "", padding - (padding - 3) + 11, event.offsetY - 4);
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
 
 			if(event.type == "mousemove" && mouseDown == false)
 			{
@@ -243,7 +305,7 @@ class GRID
 
 			
 			// ----------------------
-			const tileXY = this._Real2Tile(event.offsetX, event.offsetY);
+			//const tileXY = this._Real2Tile(event.offsetX, event.offsetY);
 			const tileIdx = this._Tile2Idx(tileXY.x, tileXY.y);
 			
 			var event_data = { color: this.GetPixelColor(tileIdx), x: tileXY.x, y: tileXY.y, i: tileIdx };
@@ -277,6 +339,36 @@ class GRID
 							}
 						}, this);
 					}
+					
+					break;
+				}
+				case 'replace_color':
+				{
+					var current_color = this.GetPixelColor(tileIdx);
+					if(current_color != undefined)
+					{
+						this.#buffer.forEach(function(pixel_data, idx)
+						{
+							if(pixel_data.color == current_color)
+							{
+								var tmp = this._Idx2Tile(idx);
+								this.DrawPixel(tmp.x, tmp.y, idx, event_resp.color);
+							}
+						}, this);
+					}
+					
+					break;
+				}
+				case 'cross_line':
+				{
+					for(let idx = 0; idx < sizeX * sizeY; idx++)
+					{
+						var tmp = this._Idx2Tile(idx);
+						if(tmp.x == tileXY.x || tmp.y == tileXY.y)
+						{
+							this.DrawPixel(tmp.x, tmp.y, idx, event_resp.color);
+						}
+					};
 					
 					break;
 				}
@@ -556,10 +648,26 @@ switch(ActiveTools)
 		}
 		
 		result = { action: "idle" };
+		
+		break;
+	}
+	case 'crossline':
+	{
+		result = { action: "cross_line", color: GetToolColor() };
+		
+		break;
+	}
+	case 'replacecolor':
+	{
+		result = { action: "replace_color", color: GetToolColor() };
+		
+		break;
 	}
 	default:
 	{
 		result = { action: "idle" };
+		
+		break;
 	}
 }
 	
@@ -636,6 +744,8 @@ switch(ActiveTools)
 
 			MyGrid.Render(config.tileX, config.tileY, FieldGrid, 15);
 			
+			$('input[data-type="frames"][data-value="repeats"]').val(config.frame_repeats).trigger('input');
+			
 		}, function(pixels, config)
 		{
 			//console.log(pixels);
@@ -648,7 +758,8 @@ switch(ActiveTools)
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
-			CopyScreenToBuff(FrameIndex++);
+			CopyScreenToBuff(FrameIndex);
+			if(config.idx < config.count-1) FrameIndex++;
 
 		});
 		if(rxf == true) return;
@@ -674,7 +785,8 @@ switch(ActiveTools)
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
-			CopyScreenToBuff(FrameIndex++);
+			CopyScreenToBuff(FrameIndex);
+			if(config.idx < config.count-1) FrameIndex++;
 			
 		});
 		if(gifoff == true) return;
@@ -692,7 +804,7 @@ switch(ActiveTools)
 			
 			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
 			
-			CopyScreenToBuff(FrameIndex++);
+			//CopyScreenToBuff(FrameIndex++);
 			pixels.forEach(function(pixel)
 			{
 				if(pixel.color.indexOf(remove_color) == 0) return;
@@ -700,7 +812,9 @@ switch(ActiveTools)
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
 				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
 			});
+			//CopyScreenToBuff(FrameIndex);
 			CopyScreenToBuff(FrameIndex);
+			if(config.idx < config.count-1) FrameIndex++;
 			
 		});
 		if(stim == true) return;
@@ -708,7 +822,7 @@ switch(ActiveTools)
 
 
 
-
+		$(event.target).val(null);
 
 
 	});
@@ -725,7 +839,7 @@ switch(ActiveTools)
 	{
 		ControlsEvent(event);
 	});
-	$('.ControlTools[type="range"]').on('change', function(event)
+	$('.ControlTools[type="range"]').on('input', function(event) // change
 	{
 		ControlsEvent(event);
 	});
@@ -746,15 +860,19 @@ switch(ActiveTools)
 		var lastcolor = $('<input type="color" value="' + obj.val() + '" />');
 		lastcolor.on('click', function(event)
 		{
-			//alert("Ещё не готово, Дракон усталь ");
-			
 			obj.val( event.target.value );
-			
 			return false;
 		});
 		
-		$('#ControlLastColors').prepend(lastcolor);
+		if( $('#ControlLastColors input[value="' + obj.val() + '"]').length == 0 )
+		{
+			$('#ControlLastColors').prepend(lastcolor);
+		}
 		
+		if( $('#ControlLastColors input').length > 8)
+		{
+			$('#ControlLastColors input').last().remove();
+		}
 	});
 	
 	
@@ -812,6 +930,49 @@ switch(ActiveTools)
 	}
 	
 */	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	$('#FrameSlider').is(function(idx, element)
+	{
+		let root = $(this);
+		
+		let before = $('<span>').text( element.min );
+		let after = $('<span>').text( element.max );
+		
+		
+		$(this).before(before);
+		$(this).after(after);
+		
+	});
+	
+	$('#FrameSlider').on('input', function(event)
+	{
+		
+		let idx = event.target.value - 1;
+		
+		if(InBuffScreenExists(idx) == true)
+		{
+			CopyBuffToScreen(idx);
+		}
+		
+	});
+	
+	
+	
+	
+	
+	
 	
 	
 	
@@ -941,51 +1102,13 @@ function ClearBuffScreen(index)
 */
 function InBuffScreenExists(index)
 {
-	return (FrameBuffer[index] !== undefined && FrameBuffer[index].pixels.length > 0) ? true : false;
+	return (FrameBuffer[index] !== undefined /*&& FrameBuffer[index].pixels.length > 0*/) ? true : false;
 }
 
 
 
 
 
-
-
-
-/*
-	data.obj   - Объект ячейки. Или это или index.
-	data.index - Индекс пикселя ( вертикальный зигзаг с верхнего левого угла )
-	data.color - Цвет в формате #RRGGBBAA
-*/
-function Field_SetPixel(data)
-{
-	if( HEX2INT(data.color.slice(7)) > 0 )
-	{
-		var field = (data.obj == undefined) ? $('td.FieldCell').eq(data.index) : data.obj;
-		var html_color = data.color.slice(0, -2);
-		var rgba_color = data.color.slice(1);
-		
-		field.css('background-color', html_color);
-		field.attr('data-active', "Y");
-		field.attr('data-color', rgba_color);
-	}
-	
-	return;
-}
-
-/*
-	data.obj   - Объект ячейки. Или это или index.
-	data.index - Индекс пикселя ( вертикальный зигзаг с верхнего левого угла )
-*/
-function Field_ClrPixel(data)
-{
-	var field = (data.obj == undefined) ? $('td.FieldCell').eq(data.index) : data.obj;
-	
-	field.css('background-color', "");
-	field.attr('data-active', "N");
-	field.attr('data-color', "00000000");
-	
-	return;
-}
 
 
 
@@ -1076,6 +1199,9 @@ function ControlsEvent(event)
 			{
 				ActiveTools = obj.data('value');
 				
+				$('.MyGUIIcon').removeClass('Active');
+				obj.addClass('Active');
+				
 				break;
 			}
 			case 'frames':
@@ -1084,12 +1210,21 @@ function ControlsEvent(event)
 				{
 					case 'timeout':
 					{
+						/*
 						
+						//var tmp = TernaryEx( obj.val(), {0: ': Нет', 255: ': Бесконечно'}, ': ' + obj.val() );
+						
+						var tmp = ': ' + ~~logslider( parseInt(obj.val()) ) + ' мс';
+						var timeout_obj = obj.siblings('legend');
+						timeout_obj.html( timeout_obj.html().replace(/: (.*)$/gm, tmp) );
+						
+						*/
 						
 						break;
 					}
 					case 'left':
 					{
+						/*
 						if(FrameIndex > 0)
 						{
 							CopyScreenToBuff(FrameIndex);
@@ -1101,17 +1236,37 @@ function ControlsEvent(event)
 								CopyBuffToScreen(FrameIndex);
 							}
 						}
+						*/
+						
+						CopyScreenToBuff(FrameIndex);
+						if(InBuffScreenExists(FrameIndex-1) == true)
+						{
+							ClearScreen();
+							FrameIndex--;
+							CopyBuffToScreen(FrameIndex);
+						}
+						
 						
 						break;
 					}
 					case 'right':
 					{
+						/*
 						CopyScreenToBuff(FrameIndex);
 						ClearScreen();
 						FrameIndex++;
 						
 						if(InBuffScreenExists(FrameIndex) == true)
 						{
+							CopyBuffToScreen(FrameIndex);
+						}
+						*/
+						
+						CopyScreenToBuff(FrameIndex);
+						if(InBuffScreenExists(FrameIndex+1) == true)
+						{
+							ClearScreen();
+							FrameIndex++;
 							CopyBuffToScreen(FrameIndex);
 						}
 						
@@ -1159,6 +1314,17 @@ function ControlsEvent(event)
 						{
 							CopyBuffToScreen(FrameIndex);
 						}
+						
+						break;
+					}
+					case 'repeats':
+					{
+						ImageRepeats = parseInt(obj.val());
+						
+						var tmp = TernaryEx( obj.val(), {0: ': Нет', 255: ': Бесконечно'}, ': ' + obj.val() );
+						
+						var legend_obj = obj.siblings('legend');
+						legend_obj.html( legend_obj.html().replace(/: (.*)$/gm, tmp) );
 						
 						break;
 					}
@@ -1260,4 +1426,39 @@ function GetImagePixels(img_src, every, callback)
 	};
 	
 	return;
+}
+
+
+
+
+
+
+
+
+function TernaryEx(val, obj, def)
+{
+	if(val in obj)
+	{
+		return obj[val];
+	}
+	else
+	{
+		return def;
+	}
+}
+
+
+function logslider(position) {
+  // position will be between 0 and 255
+  var minp = 10;
+  var maxp = 255;
+
+  // The result should be between 100 an 10000000
+  var minv = Math.log(10);
+  var maxv = Math.log(65535);
+
+  // calculate adjustment factor
+  var scale = (maxv-minv) / (maxp-minp);
+
+  return Math.exp(minv + scale*(position-minp));
 }

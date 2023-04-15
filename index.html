@@ -2,6 +2,9 @@
 <html lang="ru">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<title>PXLeditJS</title>
+		
+		<link rel="icon" type="image/x-icon" href="./images/favicon.ico">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		
 		<link type="text/css" rel="stylesheet" href="core.css" />
@@ -40,8 +43,8 @@
 		<input type="color" id="ControlColor" value="#00b0f0" />
 		<input type="range" id="ControlAlpha" min="0" max="255" step="1" value="255" />
 		
-		<fieldset style="display: block; ">
-			<div id="ControlLastColors" style="overflow: hidden; width: 224px; height: 32px; display: flow-root;"></div>
+		<fieldset style="display: block; display: block; padding: 6px; margin: 0px; border-radius: 6px;">
+			<div id="ControlLastColors" style="/*overflow: hidden; width: 224px;*/ height: 32px; /*display: flow-root;*/"></div>
 		</fieldset>
 		
 		<br>
@@ -51,13 +54,17 @@
 		<button type="button" class="ControlTools" data-type="tools" data-value="eraser">Ластик</button> 
 		<button type="button" class="ControlTools" data-type="tools" data-value="clearcolor">Удалить цвет</button> 
 		<button type="button" class="ControlTools" data-type="tools" data-value="pipette">Пипетка</button> 
+		<br>
+		<button type="button" class="ControlTools" data-type="tools" data-value="replacecolor">Заменить цвет</button> 
 		
 		<br>
 		
 		<div class="MyGUIIcon ControlTools" title="Карандаш" data-type="tools" data-value="pencil" style="background: center no-repeat url('images/pencil.png');"></div> 
-		<div class="MyGUIIcon ControlTools" title="Пипетка" data-type="tools" data-value="pipette" style="background: center no-repeat url('images/pipette.png');"></div>
+		<div class="MyGUIIcon ControlTools" title="Пипетка" data-type="tools" data-value="pipette" style="background: center no-repeat url('images/pipette.png');"></div> 
+		<div class="MyGUIIcon ControlTools" title="Ластик" data-type="tools" data-value="eraser" style="background: center no-repeat url('images/eraser.png');"></div> 
+		<div class="MyGUIIcon ControlTools" title="Крест" data-type="tools" data-value="crossline" style="background: center no-repeat url('images/crossline.png');"></div> 
+		<div class="MyGUIIcon ControlTools" title="Ничего" data-type="tools" data-value="void" style="background: center no-repeat url('images/none.png');"></div> 
 		<div class="MyGUIIcon ControlTools" title="Удалить цвет" data-type="tools" data-value="clearcolor" style="background: center no-repeat url('images/delete.png');"></div>
-		<div class="MyGUIIcon ControlTools" title="Ластик" data-type="tools" data-value="eraser" style="background: center no-repeat url('images/eraser.png');"></div>
 
 
 		
@@ -75,7 +82,7 @@
 		<input type="range" class="ControlTools ControlRange" min="0" max="65535" value="200" data-type="frames" data-value="timeout" />
 		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="left"> Назад </button> 
-		<span id="FrameActiveNum">0</span> 
+		<span id="FrameActiveNum">1/1</span> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="right"> Вперёд </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="add"> Добавить </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="copy"> Копировать </button> 
@@ -83,6 +90,20 @@
 		<button type="button" class="ControlTools" data-type="frames" data-value="tobuff"> В буфер </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="clear"> Очистить </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="delete"> Удалить </button> 
+		<br>
+		
+<!--		
+		<fieldset class="ControlElement">
+			<legend>Задержка кадра: 200 мс</legend>
+			<input type="range" class="ControlTools ControlRange1" min="10" max="255" value="60" data-type="frames" data-value="timeout" />
+		</fieldset>		
+-->		
+		
+		<fieldset class="ControlElement">
+			<legend>Повтор анимации: Нет</legend>
+			<input type="range" class="ControlTools ControlRange1" min="0" max="255" value="0" data-type="frames" data-value="repeats" />
+		</fieldset>
+		
 	</fieldset>
 	
 	
@@ -153,6 +174,11 @@
 <div class="block">
 	<table id="ScreenField"></table>
 	<br>
+	
+	<div class="">
+		<input type="range" class="" id="FrameSlider" min="1" max="255" value="16" />
+	</div>
+	
 	<canvas id="canvas" style="border: 1px red solid;"></canvas>
 </div>
 

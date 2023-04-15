@@ -14,6 +14,14 @@ function Export_Run()
 	var strip_format_id = parseInt( $('#ExportStripFormat').val() );
 	
 	
+	if( isNaN(color_format_id) == true || isNaN(strip_format_id) == true )
+	{
+		alert("Не выбран формат цвета или ленты!");
+		
+		return;
+	}
+	
+	
 	
 	
 	const data = new Uint8Array( Export_SizeCalculation() );
@@ -34,7 +42,7 @@ function Export_Run()
 	data[data_idx++] = FrameBuffer.length & 0xFF;
 	data[data_idx++] = (FrameBuffer.length >> 8) & 0xFF;
 	
-	data[data_idx++] = 0x00;
+	data[data_idx++] = ImageRepeats;
 	
 	
 	
@@ -120,7 +128,9 @@ function Export_Run()
 			}
 			default:
 			{
-				alert("Неа, ещё не умею...");
+				alert("Данный формат ленты ещё не поддерживается!");
+				
+				return;
 			}
 		}
 		
@@ -138,7 +148,7 @@ function Export_Run()
 	
 	
 	
-	console.log(data);
+	//console.log(data);
 	
 	saveByteArray('image.pxl', data.slice(0, data_idx));
 	

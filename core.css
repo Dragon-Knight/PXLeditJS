@@ -59,7 +59,7 @@ fieldset
 
 .ControlRange[type=number]
 {
-	width: 50px;
+	width: 56px;
 }
 
 
@@ -89,7 +89,7 @@ fieldset
 	box-shadow: 1px 1px 1px black;
 }
 
-.MyGUIIcon Active
+.MyGUIIcon.Active
 {
 	box-shadow: inset 0px 0px 2px black;
 }
@@ -99,4 +99,21 @@ fieldset
 
 input:invalid {
   color:red;
+}
+
+
+
+
+
+
+.ControlElement
+{
+	display: block;
+	margin: 6px 0px;
+	padding: 0px 6px;
+}
+
+.ControlElement > input
+{
+	width: 100%;
 }
