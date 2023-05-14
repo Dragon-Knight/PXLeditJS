@@ -259,6 +259,7 @@ class GRID
 		this.#ctx.beginPath();
 		this.#ctx.clearRect(0, 0, this.#canvas.width, padding);
 		this.#ctx.clearRect(0, 0, padding, this.#canvas.height);
+		this.#ctx.clearRect( (this.#canvas.width - padding), 0, this.#canvas.width, this.#canvas.height);
 			
 			
 			
@@ -274,18 +275,21 @@ class GRID
 		this.#ctx.font = "12px serif monospace";
 		this.#ctx.textBaseline = "top";
 		this.#ctx.textAlign = "center";
-		this.#ctx.fillText( text_x , event.offsetX+1, (padding - (padding - 3) + 1) );
+		this.#ctx.fillText( text_x, event.offsetX+1, (padding - (padding - 3) + 1) );
 		
+		let text_y = '' + (tileXY.y+1) + '';
 		//this.#ctx.beginPath();
 		//this.#ctx.moveTo( padding - (padding - 3), event.offsetY);
 		//this.#ctx.lineTo( (padding - 3), event.offsetY );
 		//this.#ctx.strokeStyle = "black"; //  = "black";
 		//this.#ctx.stroke();
-		
 		//this.#ctx.font = "12px serif";
 		//this.#ctx.textBaseline = "middle";
 		this.#ctx.textAlign = "right";
-		this.#ctx.fillText( "" + (tileXY.y+1) + "", padding - (padding - 3) + 11, event.offsetY - 4);
+		this.#ctx.fillText( text_y, (padding - (padding - 3) + 11), (event.offsetY - 4));
+		
+		this.#ctx.textAlign = "left";
+		this.#ctx.fillText( text_y, (this.#canvas.width - padding + 2), (event.offsetY - 4));
 			
 			
 			
@@ -1414,10 +1418,10 @@ function GetImagePixels(img_src, every, callback)
 		canvas.width = img.width;
 		canvas.height = img.height;
 		
-		const ctx = canvas.getContext("2d"/*, { colorSpace: "srgb" }*/);
+		const ctx = canvas.getContext("2d", { colorSpace: "srgb" });
 		ctx.drawImage(img, 0, 0, img.width, img.height);
 		
-		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height/*, { colorSpace: "srgb" }*/);
+		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height, { colorSpace: "srgb" });
 		const data = imgData.data;
 		
 		var result = Array();
