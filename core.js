@@ -429,10 +429,11 @@ class GRID
 		var realXY = this._Tile2Real(tileX, tileY);
 		var tileIdx = this._Tile2Idx(tileX, tileY);
 		
-		//console.log(tileX);
-		//console.log(tileY);
-
-		//if(tileX.between(0, this.#base_sizes.sizeX) && tileY.between(0, this.#base_sizes.sizeY))
+		if(this.IsPixelExist(tileIdx) == true)
+		{
+			this.ClearPixel(tileX, tileY);
+		}
+		
 		{
 			this.#ctx.beginPath();
 			this.#ctx.fillStyle = color;
