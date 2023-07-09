@@ -1,6 +1,9 @@
 <?php
 
 /*
+
+// https://github.com/Sybio/GifFrameExtractor
+
 require_once("GifFrameExtractor.php");
 
 //use GifFrameExtractor;

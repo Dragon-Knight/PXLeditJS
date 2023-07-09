@@ -10,7 +10,7 @@ var FrameIndex = 0;
 var ImageRepeats = 0;
 
 
-var ActiveTools = "pencil"; // ...........................................................................
+var ActiveTools = "undefined";
 
 
 
@@ -322,13 +322,13 @@ class GRID
 			{
 				case 'set_cell':
 				{
-					this.DrawPixel(tileXY.x, tileXY.y, tileIdx, event_resp.color);
+					this.DrawPixel(tileXY.x, tileXY.y, event_resp.color);
 					
 					break
 				}
 				case 'del_cell':
 				{
-					this.ClearPixel(tileXY.x, tileXY.y, tileIdx);
+					this.ClearPixel(tileXY.x, tileXY.y);
 					
 					break;
 				}
@@ -342,7 +342,7 @@ class GRID
 							if(pixel_data.color == delete_color)
 							{
 								var tmp = this._Idx2Tile(idx);
-								this.ClearPixel(tmp.x, tmp.y, idx);
+								this.ClearPixel(tmp.x, tmp.y);
 							}
 						}, this);
 					}
@@ -359,15 +359,32 @@ class GRID
 							if(pixel_data.color == current_color)
 							{
 								var tmp = this._Idx2Tile(idx);
-								this.DrawPixel(tmp.x, tmp.y, idx, event_resp.color);
+								this.DrawPixel(tmp.x, tmp.y, event_resp.color);
 							}
 						}, this);
 					}
 					
 					break;
 				}
-				case 'cross_line':
+				case 'line':
 				{
+					if(event_resp.line == "horizontal")
+					{
+						for(let x = 0; x < sizeX; x++)
+						{
+							this.DrawPixel(x, tileXY.y, event_resp.color);
+						}
+					}
+					
+					if(event_resp.line == "vertical")
+					{
+						for(let y = 0; y < sizeY; y++)
+						{
+							this.DrawPixel(tileXY.x, y, event_resp.color);
+						}
+					}
+
+					/*
 					for(let idx = 0; idx < sizeX * sizeY; idx++)
 					{
 						var tmp = this._Idx2Tile(idx);
@@ -376,6 +393,7 @@ class GRID
 							this.DrawPixel(tmp.x, tmp.y, idx, event_resp.color);
 						}
 					};
+					*/
 					
 					break;
 				}
@@ -406,9 +424,10 @@ class GRID
 
 
 	// Рисует пиксель по координатам тайла.
-	DrawPixel(tileX, tileY, tileIdx, color)
+	DrawPixel(tileX, tileY, color)
 	{
 		var realXY = this._Tile2Real(tileX, tileY);
+		var tileIdx = this._Tile2Idx(tileX, tileY);
 		
 		//console.log(tileX);
 		//console.log(tileY);
@@ -426,9 +445,10 @@ class GRID
 	}
 	
 	// Удаляет пиксель по координатам тайла.
-	ClearPixel(tileX, tileY, tileIdx)
+	ClearPixel(tileX, tileY)
 	{
 		var realXY = this._Tile2Real(tileX, tileY);
+		var tileIdx = this._Tile2Idx(tileX, tileY);
 		
 		this.#ctx.clearRect(realXY.x, realXY.y, (this.#base_sizes.grid - 1), (this.#base_sizes.grid - 1));
 		
@@ -475,7 +495,7 @@ class GRID
 		{
 			var tileXY = this._Idx2Tile(obj.idx);
 			
-			this.DrawPixel(tileXY.x, tileXY.y, obj.idx, obj.color);
+			this.DrawPixel(tileXY.x, tileXY.y, obj.color);
 		}, this);
 		
 		return;
@@ -488,7 +508,7 @@ class GRID
 		{
 			var tileXY = this._Idx2Tile(idx);
 			
-			this.ClearPixel(tileXY.x, tileXY.y, idx);
+			this.ClearPixel(tileXY.x, tileXY.y);
 		}
 
 		return;
@@ -633,7 +653,7 @@ MyGrid.SetClickEvent(function(type, data)
 var result = {};
 	
 	
-switch(ActiveTools)
+switch(ActiveTools.value)
 {
 	case 'pencil':
 	{
@@ -666,9 +686,9 @@ switch(ActiveTools)
 		
 		break;
 	}
-	case 'crossline':
+	case 'line':
 	{
-		result = { action: "cross_line", color: GetToolColor() };
+		result = { action: "line", line: ActiveTools.line, color: GetToolColor() };
 		
 		break;
 	}
@@ -728,7 +748,7 @@ switch(ActiveTools)
 				if(pixel.color.indexOf(remove_color) == 0) return;
 				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.color);
 			});
 			
 			if(config.idx < config.count-1)
@@ -771,7 +791,7 @@ switch(ActiveTools)
 			pixels.forEach(function(pixel)
 			{
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.color);
 			});
 			CopyScreenToBuff(FrameIndex);
 			if(config.idx < config.count-1) FrameIndex++;
@@ -798,7 +818,7 @@ switch(ActiveTools)
 				if(pixel.color.indexOf(remove_color) == 0) return;
 				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.color);
 			});
 			CopyScreenToBuff(FrameIndex);
 			if(config.idx < config.count-1) FrameIndex++;
@@ -825,7 +845,7 @@ switch(ActiveTools)
 				if(pixel.color.indexOf(remove_color) == 0) return;
 				
 				var tileXY = MyGrid._Idx2Tile(pixel.idx);
-				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.idx, pixel.color);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.color);
 			});
 			//CopyScreenToBuff(FrameIndex);
 			CopyScreenToBuff(FrameIndex);
@@ -957,7 +977,7 @@ switch(ActiveTools)
 	
 	
 	
-	
+/*
 	$('#FrameSlider').is(function(idx, element)
 	{
 		let root = $(this);
@@ -982,7 +1002,7 @@ switch(ActiveTools)
 		}
 		
 	});
-	
+*/
 	
 	
 	
@@ -1225,7 +1245,7 @@ function ControlsEvent(event)
 			}
 			case 'tools':
 			{
-				ActiveTools = obj.data('value');
+				ActiveTools = obj.data();
 				
 				$('.MyGUIIcon').removeClass('Active');
 				obj.addClass('Active');
@@ -1246,6 +1266,11 @@ function ControlsEvent(event)
 						var timeout_obj = obj.siblings('legend');
 						timeout_obj.html( timeout_obj.html().replace(/: (.*)$/gm, tmp) );
 						
+						
+
+						var tmp = ': ' + parseInt(obj.val()) + ' мс';
+						var timeout_obj = obj.siblings('legend');
+						timeout_obj.html( timeout_obj.html().replace(/: (.*)$/gm, tmp) );
 						*/
 						
 						break;
@@ -1358,7 +1383,7 @@ function ControlsEvent(event)
 					}
 				}
 				
-				var text = (FrameIndex + 1) + "/" + FrameBuffer.length;
+				var text = (FrameIndex + 1).toString().padStart(3, "0") + "/" + FrameBuffer.length.toString().padStart(3, "0");
 				$('#FrameActiveNum').text(text);
 				
 				break;

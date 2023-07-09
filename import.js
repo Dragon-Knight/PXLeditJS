@@ -214,6 +214,14 @@ function GifOffload(file, callback_frame)
 				method: "post",
 				dataType: "json",
 				data: {file: bytes64},
+				beforeSend: function()
+				{
+					$('#ImportResultText').text("Запрос, ждите...");
+				},
+				complete: function()
+				{
+					$('#ImportResultText').text("");
+				},
 				success: function(data)
 				{
 					//console.log(data);
