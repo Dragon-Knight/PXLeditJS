@@ -10,7 +10,7 @@ var FrameIndex = 0;
 var ImageRepeats = 0;
 
 
-var ActiveTools = "undefined";
+var ActiveTools = {};
 
 
 
@@ -153,6 +153,9 @@ class GRID
 	{
 		this.#canvas = document.getElementById("canvas");
 		
+		this.#canvas.addEventListener('click', this.EventHandler.bind(this));
+		this.#canvas.addEventListener('mousemove', this.EventHandler.bind(this));
+		
 		return;
 	}
 	
@@ -179,20 +182,15 @@ class GRID
 		this.#canvas.height = bh + padding*2;
 		
 		// А можно без этого костыля? В событие свой this, который переопределяется.
-		var this2 = this;
-
-
-
+		//var this2 = this;
 
 		// Не удаляются события. Почему?
-		$(this.#canvas).unbind();
-		//this.#canvas.removeEventListener('click', function(event){ this2.EventHandler(event); });
-		//this.#canvas.removeEventListener('mousemove', function(event){ this2.EventHandler(event); });
+		//$(this.#canvas).unbind();
+		//this.#canvas.removeEventListener('click', this.#event_handler);
+		//this.#canvas.removeEventListener('mousemove', this.#event_handler);
 		
-		this.#canvas.addEventListener('click', function(event){ this2.EventHandler(event); });
-		this.#canvas.addEventListener('mousemove', function(event){ this2.EventHandler(event); });;
-
-
+		//this.#canvas.addEventListener('click', this.#event_handler);
+		//this.#canvas.addEventListener('mousemove', this.#event_handler);
 
 
 
@@ -397,6 +395,91 @@ class GRID
 					
 					break;
 				}
+				case 'move':
+				{
+
+					if(event_resp.direction == "right")
+					{
+						for(let y = 0; y < sizeY; y++)
+						{
+							let displaced_pixel_color = undefined;
+							for(let x = sizeX-1; x >= 0; x--)
+							{
+								let color = this.MovePixel(x, y, x+1, y);
+								if(x == sizeX-1)
+								{
+									displaced_pixel_color = color;
+								}
+							}
+							if(displaced_pixel_color != undefined)
+							{
+								this.DrawPixel(0, y, displaced_pixel_color);
+							}
+						}
+					}
+					
+					if(event_resp.direction == "left")
+					{
+						for(let y = 0; y < sizeY; y++)
+						{
+							let displaced_pixel_color = undefined;
+							for(let x = 0; x < sizeX; x++)
+							{
+								let color = this.MovePixel(x, y, x-1, y);
+								if(x == 0)
+								{
+									displaced_pixel_color = color;
+								}
+							}
+							if(displaced_pixel_color != undefined)
+							{
+								this.DrawPixel(sizeX-1, y, displaced_pixel_color);
+							}
+						}
+					}
+
+					if(event_resp.direction == "up")
+					{
+						for(let x = 0; x < sizeX; x++)
+						{
+							let displaced_pixel_color = undefined;
+							for(let y = 0; y < sizeY; y++)
+							{
+								let color = this.MovePixel(x, y, x, y-1);
+								if(y == 0)
+								{
+									displaced_pixel_color = color;
+								}
+							}
+							if(displaced_pixel_color != undefined)
+							{
+								this.DrawPixel(x, sizeY-1, displaced_pixel_color);
+							}
+						}
+					}
+
+					if(event_resp.direction == "down")
+					{
+						for(let x = 0; x < sizeX; x++)
+						{
+							let displaced_pixel_color = undefined;
+							for(let y = sizeY-1; y >= 0; y--)
+							{
+								let color = this.MovePixel(x, y, x, y+1);
+								if(y == sizeY-1)
+								{
+									displaced_pixel_color = color;
+								}
+							}
+							if(displaced_pixel_color != undefined)
+							{
+								this.DrawPixel(x, 0, displaced_pixel_color);
+							}
+						}
+					}
+					
+					break
+				}
 				case 'idle':
 				{
 					break;
@@ -426,6 +509,8 @@ class GRID
 	// Рисует пиксель по координатам тайла.
 	DrawPixel(tileX, tileY, color)
 	{
+		if(tileX < 0 || tileY < 0 || tileX >= this.#base_sizes.sizeX || tileY >= this.#base_sizes.sizeY) return;
+		
 		var realXY = this._Tile2Real(tileX, tileY);
 		var tileIdx = this._Tile2Idx(tileX, tileY);
 		
@@ -457,7 +542,21 @@ class GRID
 		
 		return;
 	}
-	
+
+	// Перемещает пиксель но новые коодинаты.
+	MovePixel(oldTileX, oldTileY, newTileX, newTileY)
+	{
+		let color = this.GetPixelColor( this._Tile2Idx(oldTileX, oldTileY) );
+		
+		if(color != undefined)
+		{
+			this.ClearPixel(oldTileX, oldTileY);
+			this.DrawPixel(newTileX, newTileY, color);
+		}
+		
+		return color;
+	}
+
 	// Возвращает цвет пикселя из базы.
 	GetPixelColor(idx)
 	{
@@ -690,6 +789,12 @@ switch(ActiveTools.value)
 	case 'line':
 	{
 		result = { action: "line", line: ActiveTools.line, color: GetToolColor() };
+		
+		break;
+	}
+	case 'move':
+	{
+		result = { action: "move", direction: ActiveTools.direction };
 		
 		break;
 	}
