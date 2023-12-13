@@ -210,7 +210,7 @@ function GifOffload(file, callback_frame)
 			
 			$.ajax(
 			{
-				url: "gif_ext/index.php",
+				url: "utils/index.php?method=gif2png",
 				method: "post",
 				dataType: "json",
 				data: {file: bytes64},
