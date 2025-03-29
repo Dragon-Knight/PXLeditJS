@@ -9,7 +9,13 @@ if($method == "gif2png")
 	$file_raw = base64_decode($_POST['file']);
 	//$file_raw = file_get_contents("input.gif");
 	
-	$process = proc_open('gif2png.py', array(0 => array("pipe", "r"), 1 => array("pipe", "w")), $pipes /*, __DIR__, null, array(array('bypass_shell', true)) */);
+	$script = 'python3 ' . escapeshellarg(__DIR__ . '/gif2png.py');
+	$process = proc_open($script, array
+	(
+		0 => array("pipe", "r"),
+		1 => array("pipe", "w")
+	), $pipes);
+	
 	if(is_resource($process) === true)
 	{
 		fwrite($pipes[0], $file_raw);
