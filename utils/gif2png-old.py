@@ -24,14 +24,13 @@ print( "File: %s, foramt: %s, animated: %c, frames: %d" % (filename, img.format,
 if img.format == "GIF":
 	
 	for i, frame in enumerate(iter_frames(img)):
-		rgba_frame = frame.convert("RGBA")
-		#rgba_frame.save('out/test%03d.png' % i,**frame.info)
+		#frame.save('out/test%03d.png' % i,**frame.info)
 		
 		output = io.BytesIO()
-		rgba_frame.save(output, format='PNG', optimize=True)
+		frame.save(output, format='png')
 		
 		# > | frame current | frame total | frame duration | frame bytes | frame data (new line)
-		print( "> | %d | %d | %d | %d | %s" % ( (i+1), img.n_frames, frame.info.get('duration', 0), output.getbuffer().nbytes, base64.b64encode(output.getvalue()).decode('ascii')) )
+		print( "> | %d | %d | %d | %d | %s" % ( (i+1), img.n_frames, frame.info['duration'], output.getbuffer().nbytes, base64.b64encode(output.getvalue()).decode('ascii')) )
 
 else:
 	print("File is not GIF")

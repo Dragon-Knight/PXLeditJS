@@ -10,6 +10,7 @@
 		<link type="text/css" rel="stylesheet" href="html/core.css" />
 		
 		<script type="text/javascript" src="html/jquery-3.7.1.min.js"></script>
+		<script type="text/javascript" src="html/export_v2.js"></script>
 		<script type="text/javascript" src="html/core.js"></script>
 		<script type="text/javascript" src="html/export.js"></script>
 		<script type="text/javascript" src="html/import.js"></script>
@@ -49,6 +50,7 @@
 		
 		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="128" data-h="16">128x16</button> 
 		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="180" data-h="1">180x1</button> 
+		<button type="button" class="ControlTools" data-type="gridsize" data-value="preset" data-w="64" data-h="48">64x48</button> 
 	</fieldset>
 	
 	
@@ -99,13 +101,16 @@
 	<fieldset>
 		<legend>Управление кадрами</legend>
 
-		<button type="button" class="ControlTools" data-type="frames" data-value="left"> <<< </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="first" title="Первый кадр"> |<< </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="left" title="Предыдущий кадр"> <<< </button> 
 		<span id="FrameActiveNum">1/1</span> 
-		<button type="button" class="ControlTools" data-type="frames" data-value="right"> >>> </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="right" title="Следующий кадр"> >>> </button> 
+		<button type="button" class="ControlTools" data-type="frames" data-value="last" title="Последний кадр"> >>| </button> 
+		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="add"> Добавить </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="copy"> Копировать </button> 
-		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="tobuff"> В буфер </button> 
+		<br>
 		<button type="button" class="ControlTools" data-type="frames" data-value="clear"> Очистить </button> 
 		<button type="button" class="ControlTools" data-type="frames" data-value="delete"> Удалить </button> 
 		<br>
@@ -157,25 +162,25 @@
 				<option disabled selected>Выберите</option>
 				<option value="0" >RGB</option>
 				<option value="1" >RGBA</option>
-				<option value="2" >* GRBA</option>
+				<option value="2" >#* GRBA</option>
 				<option value="3" >Color_0x03</option>
 				<option value="4" >Color_0x04</option>
-				<option value="5" >Color_0x05</option>
-				<option value="6" >Color_0x06</option>
-				<option value="7" >Color_0x07</option>
-				<option value="8" >Color_0x08</option>
+				<option value="5" ># RGB + сжатие</option>
+				<option value="6" ># RGBA + сжатие</option>
+				<option value="7" ># RGB + сжатие C2</option>
+				<option value="8" ># RGBA + сжатие C2</option>
 				<option value="9" >Color_0x09</option>
 				<option value="10">Color_0x10</option>
 				<option value="11">Color_0x11</option>
 				<option value="12">Color_0x12</option>
 				<option value="13">Color_0x13</option>
-				<option value="14">Color_0x14</option>
+				<option value="14">#RGB555 + Сжатие</option>
 				<option value="15">Color_0x15</option>
 			</select>
 			
 			<select id="ExportStripFormat" class="ControlTools">
 				<option disabled selected>Выберите</option>
-				<option value="0" >Построчная</option>
+				<option value="0" ># Построчная</option>
 				<option value="1" >Strip_0x01</option>
 				<option value="2" >* Зигзаг вертикальный</option>
 				<option value="3" >Strip_0x03</option>
@@ -192,9 +197,16 @@
 				<option value="14">Strip_0x14</option>
 				<option value="15">Strip_0x15</option>
 			</select>
+			
+			<select id="ExportVersion" class="ControlTools">
+				<option disabled selected>Выберите</option>
+				<option value="1" >* Версия 1</option>
+				<option value="2" ># Версия 2</option>
+			</select>
 
 			<br>
-			<small>* Звёздочкой отмечен формат для плат Pixel.</small>
+			<small>* отмечен формат для плат Pixel.</small><br>
+			<small># отмечен формат для плат Pixel Mini.</small>
 		</fieldset>
 		
 		<br>

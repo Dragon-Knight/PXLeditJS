@@ -10,14 +10,36 @@ function Export_SizeCalculation()
 
 function Export_Run()
 {
+	var format_version = parseInt( $('#ExportVersion').val() );
 	var color_format_id = parseInt( $('#ExportColorFormat').val() );
 	var strip_format_id = parseInt( $('#ExportStripFormat').val() );
 	
 	
-	if( isNaN(color_format_id) == true || isNaN(strip_format_id) == true )
+	if( isNaN(color_format_id) == true || isNaN(strip_format_id) == true || isNaN(format_version) == true)
 	{
-		alert("Не выбран формат цвета или ленты!");
+		alert("Не выбран формат цвета или ленты или версия!");
 		
+		return;
+	}
+
+
+	if(format_version == 2)
+	{
+		let params = 
+		{
+			width: FieldWidth,				// Ширина экрана, пикселей
+			height: FieldHeight,			// Высота экрана, пикселей
+			frames: FrameBuffer.length,		// Кол-во кадров, штук
+			repeats: ImageRepeats,			// Кол-во повтором анимации
+			strip_format: strip_format_id,	// ID формата ленты
+			pixel_format: color_format_id,	// ID формата пикселей
+		};
+		
+		const export_obj = new Export_v2( FrameBuffer, params );
+		export_obj.Render();
+		const buffer = export_obj.GetFileBytes();
+		saveByteArray2('image.pxl', buffer);
+	
 		return;
 	}
 	
@@ -170,7 +192,35 @@ function saveByteArray(reportName, byte) {
     link.click();
 };
 
-
+function saveByteArray2(reportName, byteArray) {
+    // Получаем текущую дату и время в формате YYYY-MM-DD_HH-MM-SS
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/T/, '_').replace(/:/g, '-').split('.')[0];
+    
+    // Разбиваем имя файла на имя и расширение
+    const dotIndex = reportName.lastIndexOf('.');
+    const baseName = dotIndex !== -1 ? reportName.slice(0, dotIndex) : reportName;
+    const extension = dotIndex !== -1 ? reportName.slice(dotIndex) : '';
+    
+    // Создаём имя файла с датой и временем перед расширением
+    const fileName = `${baseName}_${timestamp}${extension}`;
+    
+    // Создаём Blob
+    const blob = new Blob([byteArray], { type: "application/octet-stream" });
+    
+    // Создаём ссылку для скачивания
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    
+    // Симулируем клик для скачивания
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Освобождаем память
+    URL.revokeObjectURL(link.href);
+}
 
 
 

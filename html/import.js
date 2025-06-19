@@ -33,7 +33,7 @@ function Glediator(file, cfg, callback_frame)
 	var result = false;
 	
 	var ext = file.name.split('.').pop();
-	if( ext == 'out' && file.size < 5*1024*1024 )
+	if( ext == 'out' && file.size < 100*1024*1024 )
 	{
 		var info_txt = 'Формат Glediator требует заранее уставленных параметров:\n\tРазмер: ' + cfg.width + ' x ' + cfg.height + ';\n\tПуть: Слева-направо, сверху вниз;\n\tЦвета: RGB;\nВсё верно?';
 		if(confirm(info_txt) == true)
@@ -56,6 +56,8 @@ function Glediator(file, cfg, callback_frame)
 					return;
 				}
 				
+				let previousFrameHash = null;
+				
 				do
 				{
 					if(bytes[frame_offset] != 0x01)
@@ -74,10 +76,20 @@ function Glediator(file, cfg, callback_frame)
 						frame_pixels.push( {idx: pixel_idx++, color: color} );
 					}
 					
+					frame_offset += frame_length;
+					
+					// Проверка на дубликат кадра
+					let frameString = JSON.stringify(frame_pixels);
+					let currentFrameHash = crc32(frameString);
+					if(currentFrameHash === previousFrameHash)
+					{
+						continue;
+					}
+					
 					var cb_cfg = { idx: frame_index++, count: frame_count, timeout: 100, width: cfg.width, height: cfg.height };
 					callback_frame(frame_pixels, cb_cfg);
 					
-					frame_offset += frame_length;
+					previousFrameHash = currentFrameHash;
 					
 				} while(bytes.length > frame_offset);
 			};
@@ -276,3 +288,21 @@ function StaticImage(file, callback_frame)
 	
 	return result;
 }
+
+
+function crc32(str) {
+    let crc = 0 ^ (-1);
+    for (let i = 0; i < str.length; i++) {
+        crc = (crc >>> 8) ^ table[(crc ^ str.charCodeAt(i)) & 0xff];
+    }
+    return (crc ^ (-1)) >>> 0;
+}
+
+// Предварительно вычисляем таблицу для ускорения вычисления crc32
+const table = new Uint32Array(256).map((_, k) => {
+    let c = k;
+    for (let i = 0; i < 8; i++) {
+        c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1;
+    }
+    return c;
+});

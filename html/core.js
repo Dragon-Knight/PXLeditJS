@@ -848,7 +848,7 @@ switch(ActiveTools.value)
 
 		var gld = Glediator(event.target.files[0], {width: FieldWidth, height: FieldHeight}, function(pixels, config)
 		{
-			
+/*			
 			pixels.forEach(function(pixel)
 			{
 				if(pixel.color.indexOf(remove_color) == 0) return;
@@ -871,6 +871,25 @@ switch(ActiveTools.value)
 			
 			
 			$('#ImportResultText').text('Загружено кадров: ' + (config.idx+1) + ' из ' + config.count + '.').delay(3000).fadeIn(400);
+*/
+
+
+			//console.log(pixels);
+
+			$('input[data-type="frames"][data-value="timeout"]').val(config.timeout).trigger("input");
+			
+			ClearScreen();
+			pixels.forEach(function(pixel)
+			{
+				if(pixel.color.indexOf(remove_color) == 0) return;
+				var tileXY = MyGrid._Idx2Tile(pixel.idx);
+				MyGrid.DrawPixel(tileXY.x, tileXY.y, pixel.color);
+			});
+			CopyScreenToBuff(FrameIndex);
+			if(config.idx < config.count-1) FrameIndex++;
+
+
+
 		
 		});
 		if(gld == true) return;
@@ -1322,8 +1341,12 @@ function ControlsEvent(event)
 					}
 					case 'preset':
 					{
-						FieldWidth = obj.data('w');
-						FieldHeight = obj.data('h');
+						//FieldWidth = obj.data('w');
+						//FieldHeight = obj.data('h');
+						
+						$('input[data-type="gridsize"][data-value="width"]').val( obj.data('w') );
+						$('input[data-type="gridsize"][data-value="height"]').val( obj.data('h') );
+						$('input[data-type="gridsize"]').trigger('input');
 
 						break;
 					}
@@ -1381,6 +1404,15 @@ function ControlsEvent(event)
 						
 						break;
 					}
+					case 'first':
+					{
+						CopyScreenToBuff(FrameIndex);
+						ClearScreen();
+						FrameIndex = 0;
+						CopyBuffToScreen(FrameIndex);
+						
+						break;
+					}
 					case 'left':
 					{
 						/*
@@ -1428,6 +1460,15 @@ function ControlsEvent(event)
 							FrameIndex++;
 							CopyBuffToScreen(FrameIndex);
 						}
+						
+						break;
+					}
+					case 'last':
+					{
+						CopyScreenToBuff(FrameIndex);
+						ClearScreen();
+						FrameIndex = FrameBuffer.length - 1;
+						CopyBuffToScreen(FrameIndex);
 						
 						break;
 					}
@@ -1549,10 +1590,10 @@ function GetImagePixels(img_src, every, callback)
 		canvas.width = img.width;
 		canvas.height = img.height;
 		
-		const ctx = canvas.getContext("2d", { colorSpace: "srgb" });
+		const ctx = canvas.getContext("2d", { /*colorSpace: "srgb"*/ willReadFrequently: true });
 		ctx.drawImage(img, 0, 0, img.width, img.height);
 		
-		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height, { colorSpace: "srgb" });
+		const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height/*, { colorSpace: "srgb" }*/);
 		const data = imgData.data;
 		
 		var result = Array();
